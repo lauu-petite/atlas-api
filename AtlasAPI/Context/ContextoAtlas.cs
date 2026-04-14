@@ -13,6 +13,7 @@ namespace AtlasAPI.Context
         public DbSet<Logro> Logros { get; set; }
         public DbSet<PreguntaQuiz> Preguntas { get; set; }
         public DbSet<UsuarioLogro> UsuariosLogros { get; set; }
+        public DbSet<Partida> Partidas { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

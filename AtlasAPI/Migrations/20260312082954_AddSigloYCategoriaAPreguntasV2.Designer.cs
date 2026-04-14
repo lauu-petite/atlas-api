@@ -4,6 +4,7 @@ using AtlasAPI.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AtlasAPI.Migrations
 {
     [DbContext(typeof(ContextoAtlas))]
-    partial class ContextoAtlasModelSnapshot : ModelSnapshot
+    [Migration("20260312082954_AddSigloYCategoriaAPreguntasV2")]
+    partial class AddSigloYCategoriaAPreguntasV2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

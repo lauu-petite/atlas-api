@@ -24,6 +24,31 @@ namespace AtlasAPI.Services
             return response.Text;
         }
 
+        public async Task<string> GenerarPreguntaAleatoria(int siglo, string categoria)
+        {
+            string prompt = $@"
+                Genera una pregunta de trivia histórica para una app llamada Atlas.
+                Siglo: {siglo}
+                Categoría: {categoria}
+                
+                Responde ÚNICAMENTE con un objeto JSON en este formato exacto:
+                {{
+                    ""Enunciado"": ""¿Texto de la pregunta?"",
+                    ""OpcionA"": ""Opción incorrecta 1"",
+                    ""OpcionB"": ""Opción incorrecta 2"",
+                    ""OpcionC"": ""Opción correcta"",
+                    ""RespuestaCorrecta"": ""Opción correcta"",
+                    ""Explicacion"": ""Breve explicación fascinante (máx 2 líneas)"",
+                    ""Tema"": ""Nombre del evento"",
+                    ""Siglo"": {siglo},
+                    ""Categoria"": ""{categoria}""
+                }}
+                La respuesta correcta debe estar siempre en OpcionC.
+            ";
+
+            return await GenerarTexto(prompt);
+        }
+
         public async Task<string> ObtenerExplicacionIA(int anio, string tema)
         {
             // Creamos un prompt estructurado para que la respuesta sea profesional

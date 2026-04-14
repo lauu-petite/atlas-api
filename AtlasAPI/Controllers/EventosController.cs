@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace AtlasAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/admin/eventos")]
     [ApiController]
     public class EventosController : ControllerBase
     {
@@ -85,7 +85,13 @@ namespace AtlasAPI.Controllers
                 try
                 {
                     // Asumimos que evento.Anio y evento.Titulo tienen datos
-                    evento.Descripcion = await _historiaService.ObtenerExplicacionIA(evento.Anio, evento.Titulo);
+                    string descripcionIA = await _historiaService.ObtenerExplicacionIA(evento.Anio, evento.Titulo);
+                    
+                    // Limpieza de Markdown si Gemini lo incluye
+                    if (descripcionIA.StartsWith("```"))
+                        descripcionIA = descripcionIA.Replace("```", "").Trim();
+                    
+                    evento.Descripcion = descripcionIA;
                 }
                 catch (Exception ex)
                 {

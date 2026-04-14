@@ -19,27 +19,51 @@ namespace AtlasAPI.Controllers
             _aiService = aiService;
         }
 
-        // 1. Obtener una pregunta aleatoria
+        // 1. Obtener una pregunta aleatoria (con filtros y Quiz Infinito)
         [HttpGet("random")]
-        public async Task<ActionResult<PreguntaQuiz>> GetRandom()
+        public async Task<ActionResult<PreguntaQuiz>> GetRandom(int? siglo, string? categoria)
         {
-            var total = await _context.Preguntas.CountAsync();
-            if (total == 0) return NotFound("No hay preguntas en la base de datos.");
+            IQueryable<PreguntaQuiz> query = _context.Preguntas;
+
+            if (siglo.HasValue)
+                query = query.Where(p => p.Siglo == siglo.Value);
+            
+            if (!string.IsNullOrEmpty(categoria))
+                query = query.Where(p => p.Categoria == categoria);
+
+            var listaPreguntas = await query.ToListAsync();
+            
+            if (listaPreguntas.Count == 0) 
+            {
+                // MODO QUIZ INFINITO: Generar con IA si no hay en DB
+                if (siglo.HasValue && !string.IsNullOrEmpty(categoria))
+                {
+                    var jsonPregunta = await _aiService.GenerarPreguntaAleatoria(siglo.Value, categoria);
+                    
+                    // Limpieza de Markdown si Gemini lo incluye
+                    if (jsonPregunta.StartsWith("```json"))
+                        jsonPregunta = jsonPregunta.Replace("```json", "").Replace("```", "").Trim();
+                    else if (jsonPregunta.StartsWith("```"))
+                        jsonPregunta = jsonPregunta.Replace("```", "").Trim();
+
+                    try 
+                    {
+                        var nuevaPregunta = System.Text.Json.JsonSerializer.Deserialize<PreguntaQuiz>(jsonPregunta, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                        if (nuevaPregunta != null)
+                        {
+                            _context.Preguntas.Add(nuevaPregunta);
+                            await _context.SaveChangesAsync();
+                            return Ok(nuevaPregunta);
+                        }
+                    }
+                    catch { /* Fallback si falla el JSON */ }
+                }
+                
+                return NotFound("No se encontraron preguntas y no se pudo generar una nueva.");
+            }
 
             var random = new Random();
-            var skip = random.Next(0, total);
-
-            var pregunta = await _context.Preguntas.Skip(skip).FirstOrDefaultAsync();
-            
-            if (pregunta != null && string.IsNullOrEmpty(pregunta.Explicacion))
-            {
-                // Si no tiene explicación, la pedimos a Gemini y la guardamos
-                var prompt = $"Como un historiador experto de Atlas, proporciona una explicación breve (máximo 2 líneas) y fascinante sobre el tema '{pregunta.Tema}' " +
-                             $"relacionado con esta pregunta: '{pregunta.Enunciado}'. El tono debe ser educativo y sorprendente.";
-                
-                pregunta.Explicacion = await _aiService.GenerarTexto(prompt);
-                await _context.SaveChangesAsync();
-            }
+            var pregunta = listaPreguntas[random.Next(0, listaPreguntas.Count)];
 
             return Ok(pregunta);
         }

@@ -13,5 +13,9 @@ namespace AtlasAPI.Models
         
         public string Explicacion { get; set; } = string.Empty;
         public string Tema { get; set; } = string.Empty; 
+        
+        // Nuevos campos para filtrado
+        public int Siglo { get; set; }
+        public string Categoria { get; set; } = string.Empty;
     }
 }
