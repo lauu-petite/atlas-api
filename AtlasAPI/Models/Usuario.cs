@@ -11,5 +11,8 @@ namespace AtlasAPI.Models
         public int Experiencia { get; set; } = 0;
         public string Avatar { get; set; } = "isabel"; // Isabel, Fernando, Seneca...
         public List<Logro> Logros { get; set; } = new();
+
+        // Relación N-N: Eventos que el usuario ha marcado como favoritos
+        public ICollection<UsuarioEventoFavorito> EventosFavoritos { get; set; } = new List<UsuarioEventoFavorito>();
     }
 }

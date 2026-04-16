@@ -1,0 +1,222 @@
+[
+  {
+    "id": 1,
+    "anio": -150,
+    "titulo": "Influencia helenística",
+    "descripcion": "Durante el siglo II a.C., Hispania comienza a experimentar una transformación artística vinculada al contacto con Roma y el mundo helenístico. Este proceso se produce de forma progresiva, a través del comercio, la presencia militar y la integración política.\n\nLas élites locales empiezan a adoptar nuevos modelos visuales, como el naturalismo en la escultura o la representación de divinidades clásicas. Por ejemplo, aparecen figuras como Hércules o Venus en contextos funerarios, algo inexistente en la tradición indígena anterior.\n\nSin embargo, estos elementos no sustituyen lo local, sino que conviven con estilos íberos previos, dando lugar a un arte híbrido propio de las provincias en romanización.",
+    "tipo": "Arte",
+    "latitud": 38.99,
+    "longitud": -1.86,
+    "categoriaEventoId": 1,
+    "mapaId": 1
+  },
+  {
+    "id": 2,
+    "anio": -120,
+    "titulo": "Escultura íbero-romana",
+    "descripcion": "Durante este periodo, la escultura en Hispania refleja un cambio progresivo hacia modelos romanos sin romper completamente con las tradiciones anteriores. Este proceso está muy ligado a la aparición de élites locales romanizadas.\n\nSe empiezan a ver representaciones más realistas del rostro humano y un mayor interés por la individualidad, algo característico del arte romano. En algunas zonas, las antiguas estelas simbólicas íberas conviven con retratos funerarios más naturalistas.\n\nEste fenómeno muestra cómo el arte funciona como un indicador directo de cambio social y político en las provincias.",
+    "tipo": "Arte",
+    "latitud": 37.39,
+    "longitud": -5.99,
+    "categoriaEventoId": 1,
+    "mapaId": 1
+  },
+  {
+    "id": 3,
+    "anio": -80,
+    "titulo": "Arquitectura urbana romana",
+    "descripcion": "En el siglo I a.C., la arquitectura romana se consolida como herramienta de organización del espacio urbano en Hispania. Las ciudades comienzan a estructurarse con foros, templos y edificios administrativos.\n\nEstos espacios no solo cumplen funciones prácticas, sino que también transmiten la presencia del poder romano. Por ejemplo, el foro se convierte en el centro político y social de la ciudad.\n\nEste proceso refleja la integración progresiva de Hispania en el modelo urbano romano.",
+    "tipo": "Arte",
+    "latitud": 41.12,
+    "longitud": 1.24,
+    "categoriaEventoId": 1,
+    "mapaId": 1
+  },
+  {
+    "id": 4,
+    "anio": -60,
+    "titulo": "Mosaicos en villas",
+    "descripcion": "El mosaico se convierte en una de las principales expresiones del arte doméstico en Hispania. Está estrechamente ligado al crecimiento de las villas rurales y al desarrollo de una élite terrateniente.\n\nLos temas representados incluyen escenas mitológicas, motivos geométricos y elementos de la vida cotidiana. Por ejemplo, se representan episodios de la mitología clásica como forma de mostrar cultura y estatus.\n\nEl mosaico no es solo decoración, sino una forma de comunicación social dentro del espacio privado.",
+    "tipo": "Arte",
+    "latitud": 39.47,
+    "longitud": -0.38,
+    "categoriaEventoId": 1,
+    "mapaId": 1
+  },
+  {
+    "id": 5,
+    "anio": -30,
+    "titulo": "Arte augusteo",
+    "descripcion": "Con Augusto, el arte en Hispania adquiere una función política clara. Ya no se trata solo de expresión cultural, sino de transmitir la idea de estabilidad tras décadas de guerras civiles.\n\nEn ciudades como Tarraco, se difunden retratos oficiales del emperador y programas decorativos que lo asocian con la paz y el orden. Estas imágenes reforzaban la autoridad del nuevo sistema imperial.\n\nUn ejemplo claro es la sustitución progresiva de escenas de conflicto por representaciones de prosperidad y armonía.",
+    "tipo": "Arte",
+    "latitud": 41.12,
+    "longitud": 1.24,
+    "categoriaEventoId": 1,
+    "mapaId": 1
+  },
+  {
+    "id": 6,
+    "anio": -206,
+    "titulo": "Fin de Cartago en Hispania",
+    "descripcion": "Tras la Segunda Guerra Púnica, Roma toma el control progresivo de Hispania. Este momento no representa una conquista inmediata, sino el inicio de una ocupación estructural del territorio.\n\nRoma hereda una península fragmentada, con múltiples pueblos y sistemas de poder locales. Esto obliga a una estrategia basada en alianzas y campañas militares selectivas.\n\nSe inicia así un largo proceso de transformación política y militar.",
+    "tipo": "Guerra",
+    "latitud": 37.60,
+    "longitud": -0.98,
+    "categoriaEventoId": 2,
+    "mapaId": 1
+  },
+  {
+    "id": 7,
+    "anio": -155,
+    "titulo": "Guerras lusitanas",
+    "descripcion": "Las guerras lusitanas son un conflicto prolongado basado en la resistencia de comunidades tribales frente a Roma. No se trata de una guerra convencional, sino de una lucha irregular.\n\nLos lusitanos, liderados por Viriato, utilizan emboscadas y movilidad constante. Por ejemplo, atacan columnas romanas en zonas montañosas donde la legión pierde su ventaja táctica.\n\nEste conflicto obliga a Roma a adaptar su forma de guerra en Hispania.",
+    "tipo": "Guerra",
+    "latitud": 39.82,
+    "longitud": -6.97,
+    "categoriaEventoId": 2,
+    "mapaId": 1
+  },
+  {
+    "id": 8,
+    "anio": -133,
+    "titulo": "Numancia",
+    "descripcion": "El asedio de Numancia es uno de los episodios más conocidos de la resistencia celtíbera. La ciudad resiste durante años a pesar del bloqueo romano.\n\nRoma utiliza una estrategia de asedio prolongado, evitando el combate directo y cortando suministros. El objetivo es el desgaste total de la población.\n\nLas fuentes describen una resistencia extrema, incluso en condiciones de escasez crítica dentro de la ciudad.",
+    "tipo": "Guerra",
+    "latitud": 41.76,
+    "longitud": -2.48,
+    "categoriaEventoId": 2,
+    "mapaId": 1
+  },
+  {
+    "id": 9,
+    "anio": -79,
+    "titulo": "Inestabilidad del norte",
+    "descripcion": "Antes de la conquista definitiva del norte, la región presenta una situación de inestabilidad constante. Las comunidades están organizadas en estructuras tribales y el control romano es limitado.\n\nLos enfrentamientos no son guerras formales, sino conflictos locales repetidos. Por ejemplo, ataques a puestos romanos y resistencia a la fiscalización.\n\nEste contexto anticipa las futuras Guerras Cántabras.",
+    "tipo": "Guerra",
+    "latitud": 43.36,
+    "longitud": -4.04,
+    "categoriaEventoId": 2,
+    "mapaId": 1
+  },
+  {
+    "id": 10,
+    "anio": -19,
+    "titulo": "Final de la conquista",
+    "descripcion": "Con el final de las Guerras Cántabras, Roma completa la conquista de Hispania. Este momento marca el cierre del proceso militar de expansión en la península.\n\nLa región se integra completamente en el sistema imperial, con provincias organizadas y control administrativo estable.\n\nEste evento simboliza el paso de territorio conquistado a provincia consolidada.",
+    "tipo": "Guerra",
+    "latitud": 43.46,
+    "longitud": -3.80,
+    "categoriaEventoId": 2,
+    "mapaId": 1
+  },
+  {
+    "id": 11,
+    "anio": -197,
+    "titulo": "División provincial",
+    "descripcion": "Roma divide Hispania en dos provincias: Citerior y Ulterior. Esta decisión responde a la necesidad de controlar un territorio amplio y complejo.\n\nCada provincia tiene funciones militares y administrativas propias. Esto permite una gestión más eficiente del territorio.\n\nEs el primer paso hacia una estructura provincial estable.",
+    "tipo": "Politica",
+    "latitud": 40.42,
+    "longitud": -3.70,
+    "categoriaEventoId": 3,
+    "mapaId": 1
+  },
+  {
+    "id": 12,
+    "anio": -139,
+    "titulo": "Consolidación administrativa",
+    "descripcion": "La administración romana en Hispania se vuelve más estable. Se introducen estructuras fiscales y políticas más organizadas.\n\nLas élites locales comienzan a colaborar con Roma, actuando como intermediarios del poder. Por ejemplo, asumen cargos administrativos en sus ciudades.\n\nEste proceso facilita la integración del territorio.",
+    "tipo": "Politica",
+    "latitud": 37.88,
+    "longitud": -4.77,
+    "categoriaEventoId": 3,
+    "mapaId": 1
+  },
+  {
+    "id": 13,
+    "anio": -90,
+    "titulo": "Ciudadanía romana",
+    "descripcion": "Roma comienza a extender la ciudadanía a élites locales en Hispania. Esto es una herramienta política clave para la integración.\n\nLa ciudadanía permite acceso a derechos legales y participación en estructuras romanas. Por ejemplo, algunas familias locales ascienden socialmente dentro del sistema imperial.\n\nEsto refuerza la lealtad al poder romano.",
+    "tipo": "Politica",
+    "latitud": 41.65,
+    "longitud": -0.88,
+    "categoriaEventoId": 3,
+    "mapaId": 1
+  },
+  {
+    "id": 14,
+    "anio": -45,
+    "titulo": "Reformas cesarianas",
+    "descripcion": "Tras las guerras civiles, César reorganiza la administración de Hispania. El objetivo es mejorar el control fiscal y militar del territorio.\n\nSe redefinen estructuras provinciales y se refuerza la autoridad central. Esto reduce la autonomía de ciertos gobernadores locales.\n\nMarca una transición hacia un sistema más centralizado.",
+    "tipo": "Politica",
+    "latitud": 36.72,
+    "longitud": -4.42,
+    "categoriaEventoId": 3,
+    "mapaId": 1
+  },
+  {
+    "id": 15,
+    "anio": -27,
+    "titulo": "Hispania de Augusto",
+    "descripcion": "Con Augusto, Hispania se integra plenamente en el sistema imperial. Se establece un modelo político estable basado en provincias organizadas.\n\nEl poder central controla de forma más directa la administración del territorio. Esto reduce conflictos internos y mejora la estabilidad.\n\nEs el inicio del periodo imperial en la península.",
+    "tipo": "Politica",
+    "latitud": 41.12,
+    "longitud": 1.24,
+    "categoriaEventoId": 3,
+    "mapaId": 1
+  },
+  {
+    "id": 16,
+    "anio": -120,
+    "titulo": "Calzadas romanas",
+    "descripcion": "La construcción de calzadas transforma la conexión entre territorios en Hispania. Estas infraestructuras permiten mover tropas, mercancías y comunicación.\n\nPor ejemplo, rutas como la Vía Augusta conectan ciudades clave del Mediterráneo. Esto facilita la integración económica del territorio.\n\nEs una de las bases del control romano.",
+    "tipo": "Ciencia",
+    "latitud": 39.57,
+    "longitud": 2.65,
+    "categoriaEventoId": 4,
+    "mapaId": 1
+  },
+  {
+    "id": 17,
+    "anio": -100,
+    "titulo": "Sistemas hidráulicos",
+    "descripcion": "Roma introduce sistemas avanzados de abastecimiento de agua en ciudades hispanas. Los acueductos permiten el crecimiento urbano.\n\nPor ejemplo, ciudades como Segovia desarrollan infraestructuras que aseguran suministro constante de agua.\n\nEsto mejora la calidad de vida urbana y la organización social.",
+    "tipo": "Ciencia",
+    "latitud": 40.95,
+    "longitud": -4.12,
+    "categoriaEventoId": 4,
+    "mapaId": 1
+  },
+  {
+    "id": 18,
+    "anio": -70,
+    "titulo": "Agricultura romana",
+    "descripcion": "Se introducen nuevas técnicas agrícolas que aumentan la productividad del campo. Esto incluye rotación de cultivos y herramientas mejoradas.\n\nPor ejemplo, se amplía la producción de cereal y aceite para exportación.\n\nEsto integra Hispania en la economía mediterránea.",
+    "tipo": "Ciencia",
+    "latitud": 37.18,
+    "longitud": -3.60,
+    "categoriaEventoId": 4,
+    "mapaId": 1
+  },
+  {
+    "id": 19,
+    "anio": -50,
+    "titulo": "Minería",
+    "descripcion": "La minería se convierte en un sector clave de la economía romana en Hispania. Se aplican técnicas avanzadas de extracción.\n\nPor ejemplo, el uso de sistemas hidráulicos para explotar oro y plata en regiones del norte.\n\nEsto convierte a Hispania en una región estratégica.",
+    "tipo": "Ciencia",
+    "latitud": 42.60,
+    "longitud": -6.60,
+    "categoriaEventoId": 4,
+    "mapaId": 1
+  },
+  {
+    "id": 20,
+    "anio": -20,
+    "titulo": "Urbanismo romano",
+    "descripcion": "El urbanismo romano introduce un modelo estructurado de ciudad basado en ejes ortogonales. Esto organiza el espacio urbano de forma funcional.\n\nPor ejemplo, el cardo y el decumanus estructuran el diseño de ciudades nuevas.\n\nEsto refleja la visión racional del espacio romano.",
+    "tipo": "Ciencia",
+    "latitud": 41.65,
+    "longitud": -0.88,
+    "categoriaEventoId": 4,
+    "mapaId": 1
+  }
+]

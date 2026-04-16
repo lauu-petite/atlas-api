@@ -9,5 +9,8 @@ namespace AtlasAPI.Models
         public int Aciertos { get; set; }
         public int TotalPreguntas { get; set; }
         public DateTime Fecha { get; set; } = DateTime.Now;
+
+        // Relación detallada de respuestas
+        public ICollection<RespuestaPartida> RespuestasPartida { get; set; } = new List<RespuestaPartida>();
     }
 }

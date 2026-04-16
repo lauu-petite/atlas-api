@@ -17,5 +17,8 @@ namespace AtlasAPI.Models
         // Nuevos campos para filtrado
         public int Siglo { get; set; }
         public string Categoria { get; set; } = string.Empty;
+
+        // Relación con respuestas de partidas
+        public ICollection<RespuestaPartida> RespuestasPartida { get; set; } = new List<RespuestaPartida>();
     }
 }

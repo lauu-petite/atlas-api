@@ -16,7 +16,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<HistoriaService>();
+builder.Services.AddScoped<EventoJsonLoader>();
 var app = builder.Build();
+
+// Sembrar datos desde JSON si es necesario
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var loader = scope.ServiceProvider.GetRequiredService<EventoJsonLoader>();
+        await loader.LoadAsync();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"⚠️ Error al cargar datos iniciales: {ex.Message}");
+    }
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -31,4 +46,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run("http://0.0.0.0:5222");
+Console.WriteLine("🚀 Iniciando Atlas API...");
+Console.WriteLine("🔗 Swagger disponible en: http://localhost:5223/swagger");
+
+app.Run();

@@ -94,11 +94,11 @@ namespace AtlasAPI.Controllers
 
             if (usuario == null) return NotFound("Usuario no encontrado");
 
-            nuevoLogro.UsuarioId = id;
+            nuevoLogro.Id = 0;
             usuario.Logros.Add(nuevoLogro);
 
             await _context.SaveChangesAsync();
-            return Ok(usuario);
+            return Ok(nuevoLogro);
         }
 
         // 6. BORRAR CUENTA
