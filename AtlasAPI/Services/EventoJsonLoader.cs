@@ -50,7 +50,9 @@ namespace AtlasAPI.Services
                     Tipo = d.Tipo,
                     Latitud = d.Latitud,
                     Longitud = d.Longitud,
-                    CategoriaEventoId = d.CategoriaEventoId,
+                    CategoriaNombre = d.CategoriaNombre,
+                    CategoriaColor = d.CategoriaColor,
+                    CategoriaIconoUrl = d.CategoriaIconoUrl,
                     MapaId = d.MapaId
                 }).ToList();
 

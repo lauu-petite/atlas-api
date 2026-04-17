@@ -7,6 +7,8 @@ namespace AtlasAPI.Models
         public double Lat { get; set; }
         public double Lon { get; set; }
         public string Descripcion { get; set; } = string.Empty;
-        public int CategoriaId { get; set; } // 1: Política, 2: Ciencia, 3: Guerra, 4: Arte
+        public string CategoriaNombre { get; set; } = string.Empty;
+        public string CategoriaColor { get; set; } = string.Empty;
+        public string CategoriaIconoUrl { get; set; } = string.Empty;
     }
 }

@@ -17,8 +17,5 @@ namespace AtlasAPI.Models
 
         // Relación 1-N: Un mapa tiene muchos eventos
         public ICollection<Evento> Eventos { get; set; } = new List<Evento>();
-
-        // Relación N-N: Categorías disponibles/visibles en este mapa
-        public ICollection<CategoriaEvento> CategoriasDisponibles { get; set; } = new List<CategoriaEvento>();
     }
 }

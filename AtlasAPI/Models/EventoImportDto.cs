@@ -9,7 +9,9 @@ namespace AtlasAPI.Models
         public string Tipo { get; set; } = string.Empty;
         public double Latitud { get; set; }
         public double Longitud { get; set; }
-        public int CategoriaEventoId { get; set; }
+        public string CategoriaNombre { get; set; } = string.Empty;
+        public string CategoriaColor { get; set; } = string.Empty;
+        public string CategoriaIconoUrl { get; set; } = string.Empty;
         public int MapaId { get; set; }
     }
 }

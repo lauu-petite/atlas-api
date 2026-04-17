@@ -13,8 +13,5 @@ namespace AtlasAPI.Models
 
         // Lista de eventos relacionados
         public List<Evento> Eventos { get; set; } = new List<Evento>();
-
-        // Categorías que utiliza este mapa para su leyenda
-        public List<CategoriaEvento> Categorias { get; set; } = new List<CategoriaEvento>();
     }
 }

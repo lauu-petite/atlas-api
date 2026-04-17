@@ -1,4 +1,4 @@
-﻿using AtlasAPI.Context;
+using AtlasAPI.Context;
 using AtlasAPI.Models;
 using AtlasAPI.Services;
 using Microsoft.AspNetCore.Http;
@@ -45,7 +45,6 @@ namespace AtlasAPI.Controllers
         }
 
         // PUT: api/PreguntaQuizs/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPreguntaQuiz(int id, PreguntaQuiz preguntaQuiz)
         {
@@ -76,7 +75,6 @@ namespace AtlasAPI.Controllers
         }
 
         // POST: api/PreguntaQuizs
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<PreguntaQuiz>> PostPreguntaQuiz(PreguntaQuiz preguntaQuiz)
         {
@@ -107,8 +105,8 @@ namespace AtlasAPI.Controllers
             return _context.Preguntas.Any(e => e.Id == id);
         }
     }
-    // CONTROLADOR 2: Uso IA
 
+    // CONTROLADOR 2: Uso IA
     [Route("api/[controller]")]
     [ApiController]
     public class QuizController : ControllerBase
@@ -128,7 +126,8 @@ namespace AtlasAPI.Controllers
             var usuario = await _context.Usuarios.FindAsync(usuarioId);
             if (usuario == null) return NotFound("Usuario no encontrado en la base de datos");
 
-            var pregunta = await _aiService.GenerarPreguntaAleatoria(usuario.Nivel, tema);
+            // Nivel del usuario se toma como Siglo aproximado para la IA si no se especifica
+            var pregunta = await _aiService.GenerarPreguntaAleatoria(usuario.Puntos / 100, tema); 
             return Ok(pregunta);
         }
     }
