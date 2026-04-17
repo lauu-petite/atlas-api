@@ -27,10 +27,10 @@ namespace AtlasAPI.Controllers
 
             if (siglo.HasValue)
                 query = query.Where(p => p.Siglo == siglo.Value);
-            
+
             if (!string.IsNullOrEmpty(categoria))
                 query = query.Where(p => p.Categoria == categoria);
-
+            
             var listaPreguntas = await query.ToListAsync();
             
             if (listaPreguntas.Count == 0) 
@@ -45,14 +45,14 @@ namespace AtlasAPI.Controllers
                         jsonPregunta = jsonPregunta.Replace("```json", "").Replace("```", "").Trim();
                     else if (jsonPregunta.StartsWith("```"))
                         jsonPregunta = jsonPregunta.Replace("```", "").Trim();
-
+                
                     try 
                     {
                         var nuevaPregunta = System.Text.Json.JsonSerializer.Deserialize<PreguntaQuiz>(jsonPregunta, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                         if (nuevaPregunta != null)
                         {
                             _context.Preguntas.Add(nuevaPregunta);
-                            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
                             return Ok(nuevaPregunta);
                         }
                     }

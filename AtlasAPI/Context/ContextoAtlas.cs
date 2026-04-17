@@ -4,10 +4,13 @@ using AtlasAPI.Models;
 namespace AtlasAPI.Context
 {
     public class ContextoAtlas : DbContext
+    public class ContextoAtlas: DbContext
     {
+
         public ContextoAtlas(DbContextOptions<ContextoAtlas> options) : base(options) { }
 
         public DbSet<Evento> Eventos { get; set; }
+
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Logro> Logros { get; set; }
         public DbSet<PreguntaQuiz> Preguntas { get; set; }
