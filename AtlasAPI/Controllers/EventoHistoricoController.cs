@@ -39,24 +39,12 @@ namespace AtlasAPI.Controllers
                 Lat = e.Latitud,
                 Lon = e.Longitud,
                 Descripcion = e.Descripcion,
-                CategoriaId = MapTipoToCategoriaId(e.Tipo)
+                CategoriaNombre = e.CategoriaNombre,
+                CategoriaColor = e.CategoriaColor,
+                CategoriaIconoUrl = e.CategoriaIconoUrl
             }).ToList();
 
             return Ok(dtos);
-        }
-
-        private static int MapTipoToCategoriaId(string tipo)
-        {
-            if (string.IsNullOrEmpty(tipo)) return 1;
-
-            return tipo.ToLower().Trim() switch
-            {
-                "política" or "politica" or "politics" => 1,
-                "ciencia" or "science" or "tecnología" or "tecnologia" => 2,
-                "guerra" or "war" or "militar" or "conflicto" => 3,
-                "arte" or "art" or "cultura" or "culture" => 4,
-                _ => 1 // Por defecto Política si no coincide
-            };
         }
     }
 }

@@ -4,7 +4,6 @@ using AtlasAPI.Models;
 namespace AtlasAPI.Context
 {
     public class ContextoAtlas : DbContext
-    public class ContextoAtlas: DbContext
     {
 
         public ContextoAtlas(DbContextOptions<ContextoAtlas> options) : base(options) { }
@@ -19,7 +18,6 @@ namespace AtlasAPI.Context
         public DbSet<Mapa> Mapas { get; set; }
         public DbSet<RespuestaPartida> RespuestasPartida { get; set; }
         public DbSet<UsuarioEventoFavorito> UsuarioEventoFavoritos { get; set; }
-        public DbSet<CategoriaEvento> CategoriasEvento { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -52,6 +50,7 @@ namespace AtlasAPI.Context
                 .WithMany(u => u.EventosFavoritos)
                 .HasForeignKey(uef => uef.UsuarioId);
 
+            // Relación N-N: Usuario - Evento (Favoritos)
             modelBuilder.Entity<UsuarioEventoFavorito>()
                 .HasOne(uef => uef.Evento)
                 .WithMany(e => e.UsuariosFavoritos)
@@ -63,18 +62,6 @@ namespace AtlasAPI.Context
                 .WithOne(e => e.Mapa)
                 .HasForeignKey(e => e.MapaId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            // Relación 1-N: CategoriaEvento - Eventos
-            modelBuilder.Entity<CategoriaEvento>()
-                .HasMany(c => c.Eventos)
-                .WithOne(e => e.Categoria)
-                .HasForeignKey(e => e.CategoriaEventoId);
-
-            // Relación N-N: Mapa - CategoriaEvento
-            modelBuilder.Entity<Mapa>()
-                .HasMany(m => m.CategoriasDisponibles)
-                .WithMany(c => c.Mapas)
-                .UsingEntity(j => j.ToTable("MapaCategorias"));
         }
     }
 }

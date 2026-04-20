@@ -10,9 +10,10 @@ namespace AtlasAPI.Models
         public double Latitud { get; set; }
         public double Longitud { get; set; }
 
-        // Relación 1-N: Un evento pertenece a una categoría
-        public int CategoriaEventoId { get; set; }
-        public CategoriaEvento? Categoria { get; set; }
+        // Propiedades de categoría "aplanadas" para compatibilidad con Android
+        public string CategoriaNombre { get; set; } = string.Empty;
+        public string CategoriaColor { get; set; } = string.Empty;
+        public string CategoriaIconoUrl { get; set; } = string.Empty;
 
         // Relación 1-N: Un evento pertenece a un mapa
         public int MapaId { get; set; }

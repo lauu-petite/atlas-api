@@ -8,74 +8,71 @@ namespace AtlasAPI.Services
     public class EventoJsonLoader
     {
         private readonly ContextoAtlas _context;
-        private readonly ILogger<EventoJsonLoader> _logger;
 
-        public EventoJsonLoader(ContextoAtlas context, ILogger<EventoJsonLoader> logger)
+        public EventoJsonLoader(ContextoAtlas context)
         {
             _context = context;
-            _logger = logger;
         }
 
         public async Task LoadAsync()
         {
             try
             {
-                // Ruta robusta combinando ambas posibilidades
-                var path = Path.Combine(AppContext.BaseDirectory, "Data", "eventos.json");
-                if (!File.Exists(path))
-                {
-                    path = Path.Combine(Directory.GetCurrentDirectory(), "Data", "eventos.json");
-                }
+                Console.WriteLine("🛠️ Iniciando carga forzada de eventos...");
 
-                if (!File.Exists(path))
-                {
-                    _logger.LogWarning("⚠️ No se encontró el archivo JSON de eventos en: {Path}", path);
-                    return;
-                }
+                // 1. LIMPIEZA TOTAL
+                await _context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 0;");
+                await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE Eventos;");
+                await _context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 1;");
 
-                var json = await File.ReadAllTextAsync(path);
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var dtos = JsonSerializer.Deserialize<List<EventoImportDto>>(json, options);
+                // 2. EVENTO DE PRUEBA (Para confirmar que la DB funciona)
+                var prueba = new Evento {
+                    Anio = 2026,
+                    Titulo = "Conexión Establecida",
+                    Descripcion = "Si ves esto, la base de datos está funcionando correctamente.",
+                    Tipo = "Sistema",
+                    Latitud = 40.41,
+                    Longitud = -3.70,
+                    CategoriaNombre = "Política",
+                    CategoriaColor = "#27ae60",
+                    CategoriaIconoUrl = "✅",
+                    MapaId = 1
+                };
+                _context.Eventos.Add(prueba);
+                await _context.SaveChangesAsync();
+                Console.WriteLine("📌 Evento de prueba creado en la base de datos.");
 
-                if (dtos == null || !dtos.Any()) return;
-
-                // Obtener IDs ya existentes para evitar duplicados
-                var existingIds = await _context.Eventos.Select(e => e.Id).ToListAsync();
-                var newEvents = dtos.Where(d => !existingIds.Contains(d.Id)).Select(d => new Evento
-                {
-                    Id = d.Id,
-                    Anio = d.Anio,
-                    Titulo = d.Titulo,
-                    Descripcion = d.Descripcion,
-                    Tipo = d.Tipo,
-                    Latitud = d.Latitud,
-                    Longitud = d.Longitud,
-                    CategoriaNombre = d.CategoriaNombre,
-                    CategoriaColor = d.CategoriaColor,
-                    CategoriaIconoUrl = d.CategoriaIconoUrl,
-                    MapaId = d.MapaId
-                }).ToList();
-
-                if (newEvents.Any())
-                {
-                    // Forzar inserción de ID si la base de datos usa autoincremental
-                    using (var transaction = await _context.Database.BeginTransactionAsync())
-                    {
-                        try {
-                            _context.Eventos.AddRange(newEvents);
-                            await _context.SaveChangesAsync();
-                            await transaction.CommitAsync();
-                            _logger.LogInformation("✅ Se han importado {Count} nuevos eventos desde el JSON.", newEvents.Count);
-                        } catch (Exception ex) {
-                            await transaction.RollbackAsync();
-                            _logger.LogError(ex, "❌ Error guardando los eventos del JSON.");
-                        }
+                // 3. CARGAR JSON
+                string path = @"C:\Users\desarrollo\source\repos\AtlasAPI\AtlasAPI\Data\eventos.json";
+                if (File.Exists(path)) {
+                    var json = await File.ReadAllTextAsync(path);
+                    var dtos = JsonSerializer.Deserialize<List<EventoImportDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    
+                    if (dtos != null && dtos.Any()) {
+                        var nuevos = dtos.Select(d => new Evento {
+                            Anio = d.Anio,
+                            Titulo = d.Titulo,
+                            Descripcion = d.Descripcion,
+                            Tipo = d.Tipo,
+                            Latitud = d.Latitud,
+                            Longitud = d.Longitud,
+                            CategoriaNombre = d.CategoriaNombre,
+                            CategoriaColor = d.CategoriaColor,
+                            CategoriaIconoUrl = d.CategoriaIconoUrl,
+                            MapaId = d.MapaId
+                        }).ToList();
+                        
+                        _context.Eventos.AddRange(nuevos);
+                        await _context.SaveChangesAsync();
+                        Console.WriteLine($"✅ ¡SÍ! Se han cargado {nuevos.Count} eventos adicionales desde el JSON.");
                     }
+                } else {
+                    Console.WriteLine($"❌ No se encontró el JSON en {path}, pero el evento de prueba debería estar listo.");
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "❌ Error crítico al cargar el JSON de eventos.");
+                Console.WriteLine($"❌ ERROR TOTAL: {ex.Message}");
             }
         }
     }

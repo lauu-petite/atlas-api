@@ -127,8 +127,7 @@ namespace AtlasAPI.Controllers
             if (usuario == null) return NotFound("Usuario no encontrado en la base de datos");
 
             // Nivel del usuario se toma como Siglo aproximado para la IA si no se especifica
-            var pregunta = await _aiService.GenerarPreguntaAleatoria(usuario.Puntos / 100, tema); 
-            return Ok(pregunta);
-        }
+            var pregunta = await _aiService.GenerarPreguntaAleatoria(usuario.Nivel, tema);
+            return Ok(pregunta);        }
     }
 }
