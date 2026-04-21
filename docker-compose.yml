@@ -1,0 +1,21 @@
+services:
+  db:
+    image: mysql:8.0
+    container_name: atlas_db_container
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: atlas_db
+    ports:
+      - "3307:3306"
+
+  api:
+    build: .
+    container_name: atlas_api_container
+    ports:
+      - "60000:5223"
+    environment:
+      - ConnectionStrings__DefaultConnection=server=db;port=3306;database=atlas_db;user=root;password=1234
+      - Gemini__ApiKey=AIzaSyCS6_8xzwyNKN7iYD0-VIAq27pwpUpFgyg
+    depends_on:
+      - db

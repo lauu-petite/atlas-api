@@ -43,7 +43,7 @@ namespace AtlasAPI.Services
                 Console.WriteLine("📌 Evento de prueba creado en la base de datos.");
 
                 // 3. CARGAR JSON
-                string path = @"C:\Users\desarrollo\source\repos\AtlasAPI\AtlasAPI\Data\eventos.json";
+                string path = Path.Combine(AppContext.BaseDirectory, "Data", "eventos.json");
                 if (File.Exists(path)) {
                     var json = await File.ReadAllTextAsync(path);
                     var dtos = JsonSerializer.Deserialize<List<EventoImportDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
