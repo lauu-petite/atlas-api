@@ -1,4 +1,4 @@
-﻿using AtlasAPI.Context;
+using AtlasAPI.Context;
 using AtlasAPI.Models;
 using AtlasAPI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -39,8 +39,10 @@ namespace AtlasAPI.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<UsuarioDto>> GetUsuario(int id)
         {
-            var usuario = await _context.Usuarios.Include(u => u.Logros)
-                                                 .FirstOrDefaultAsync(u => u.Id == id);
+            var usuario = await _context.Usuarios
+                .Include(u => u.Logros)
+                .Include(u => u.EventosFavoritos)
+                .FirstOrDefaultAsync(u => u.Id == id);
 
             if (usuario == null) return NotFound();
             return Ok(MapToDto(usuario));
@@ -144,9 +146,10 @@ namespace AtlasAPI.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UsuarioDto>> Login([FromBody] Usuario loginRequest)
         {
-            // 1. Buscar solo por nombre
+            // 1. Buscar solo por nombre con favoritos
             var usuario = await _context.Usuarios
                 .Include(u => u.Logros)
+                .Include(u => u.EventosFavoritos)
                 .FirstOrDefaultAsync(u => u.Nombre == loginRequest.Nombre);
 
             // 2. Verificar si existe y si la contraseña coincide (BCrypt)
@@ -209,7 +212,8 @@ namespace AtlasAPI.Controllers
                 Nivel = u.Nivel,
                 Experiencia = u.Experiencia,
                 Avatar = u.Avatar,
-                Logros = u.Logros
+                Logros = u.Logros,
+                EventosFavoritosIds = u.EventosFavoritos?.Select(f => f.EventoId).ToList() ?? new List<int>()
             };
         }
 

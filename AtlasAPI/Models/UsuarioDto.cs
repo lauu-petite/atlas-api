@@ -9,5 +9,6 @@ namespace AtlasAPI.Models
         public int Experiencia { get; set; } = 0;
         public string Avatar { get; set; } = "isabel";
         public List<Logro> Logros { get; set; } = new();
+        public List<int> EventosFavoritosIds { get; set; } = new();
     }
 }
