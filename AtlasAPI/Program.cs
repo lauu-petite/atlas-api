@@ -61,6 +61,15 @@ using (var scope = app.Services.CreateScope())
             await loader.LoadAsync();
             Console.WriteLine("Eventos cargados desde archivo JSON.");
         }
+
+        // Configurar privilegios de administrador para el usuario 'admin'
+        var usuarioAdmin = await context.Usuarios.FirstOrDefaultAsync(u => u.Nombre == "admin");
+        if (usuarioAdmin != null && usuarioAdmin.Rol != "ADMIN")
+        {
+            usuarioAdmin.Rol = "ADMIN";
+            await context.SaveChangesAsync();
+            Console.WriteLine("Usuario 'admin' actualizado a rol ADMINISTRADOR.");
+        }
     }
     catch (Exception ex)
     {
