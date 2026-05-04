@@ -19,38 +19,47 @@ namespace AtlasAPI.Controllers
             _historiaService = historiaService;
         }
 
-        // 1. OBTENER TODOS LOS JUGADORES
+        // 1. OBTENER TODOS LOS JUGADORES (MODO ADMIN)
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
+        public async Task<ActionResult<IEnumerable<UsuarioDto>>> GetUsuarios([FromHeader(Name = "Admin-Id")] int adminId, [FromHeader(Name = "Admin-Key")] string key)
         {
-            // Incluimos los logros para verlos en la lista
-            return await _context.Usuarios.Include(u => u.Logros).ToListAsync();
+            // 1. Verificar Key estática
+            if (key != "ADMIN") return Unauthorized("Llave de admin incorrecta");
+
+            // 2. Verificar Rol en Base de Datos
+            var admin = await _context.Usuarios.FindAsync(adminId);
+            if (admin == null || admin.Rol != "ADMIN") 
+                return Unauthorized("No tienes permisos de administrador o el ID es inválido");
+
+            var usuarios = await _context.Usuarios.Include(u => u.Logros).ToListAsync();
+            return Ok(usuarios.Select(MapToDto));
         }
 
-        // 2. PERFIL DE UN USUARIO (Para la pantalla de perfil en Android)
+        // 2. PERFIL DE UN USUARIO
         [HttpGet("{id}")]
-        public async Task<ActionResult<Usuario>> GetUsuario(int id)
+        public async Task<ActionResult<UsuarioDto>> GetUsuario(int id)
         {
             var usuario = await _context.Usuarios.Include(u => u.Logros)
                                                  .FirstOrDefaultAsync(u => u.Id == id);
 
             if (usuario == null) return NotFound();
-            return usuario;
+            return Ok(MapToDto(usuario));
         }
 
-        // 3. REGISTRO DE NUEVO USUARIO
+        // 3. REGISTRO DE NUEVO USUARIO (Con Hashing)
         [HttpPost]
-        public async Task<ActionResult<Usuario>> PostUsuario([FromBody] Usuario usuario)
+        public async Task<ActionResult<UsuarioDto>> PostUsuario([FromBody] Usuario usuario)
         {
-            // Esto imprimirá en la consola negra de Visual Studio lo que llega de Android
-            Console.WriteLine($"REGISTRO RECIBIDO -> Nombre: '{usuario.Nombre}', Pass: '{usuario.Password}'");
-
             if (string.IsNullOrWhiteSpace(usuario.Nombre) || usuario.Nombre.Length < 4)
             {
                 return BadRequest("El nombre de usuario debe tener al menos 4 caracteres.");
             }
 
-            // Validar que no contenga símbolos extraños (Solo letras, números y espacios)
+            if (string.IsNullOrWhiteSpace(usuario.Password))
+            {
+                return BadRequest("La contraseña es obligatoria.");
+            }
+
             if (!Regex.IsMatch(usuario.Nombre, @"^[a-zA-Z0-9 ]+$"))
             {
                 return BadRequest("El nombre de usuario solo puede contener letras, números y espacios.");
@@ -59,9 +68,15 @@ namespace AtlasAPI.Controllers
             var existe = await _context.Usuarios.AnyAsync(u => u.Nombre == usuario.Nombre);
             if (existe) return BadRequest("El nombre de usuario ya está registrado");
 
+            // SEGURIDAD: Hash de contraseña y rol por defecto
+            usuario.PasswordHash = BCrypt.Net.BCrypt.HashPassword(usuario.Password);
+            usuario.Rol = "USER";
+            usuario.EstaBaneado = false;
+
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
-            return CreatedAtAction("GetUsuario", new { id = usuario.Id }, usuario);
+            
+            return CreatedAtAction("GetUsuario", new { id = usuario.Id }, MapToDto(usuario));
         }
 
         // 4. ACTUALIZAR PROGRESO (Subir de nivel/experiencia)
@@ -70,7 +85,13 @@ namespace AtlasAPI.Controllers
         {
             if (id != usuario.Id) return BadRequest();
 
-            _context.Entry(usuario).State = EntityState.Modified;
+            var usuarioEnDb = await _context.Usuarios.FindAsync(id);
+            if (usuarioEnDb == null) return NotFound();
+
+            // Solo permitimos actualizar campos de progreso, NO el password ni el rol desde aquí
+            usuarioEnDb.Nivel = usuario.Nivel;
+            usuarioEnDb.Experiencia = usuario.Experiencia;
+            usuarioEnDb.Avatar = usuario.Avatar;
 
             try
             {
@@ -101,10 +122,15 @@ namespace AtlasAPI.Controllers
             return Ok(nuevoLogro);
         }
 
-        // 6. BORRAR CUENTA
+        // 6. BORRAR CUENTA (ADMIN)
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUsuario(int id)
+        public async Task<IActionResult> DeleteUsuario(int id, [FromHeader(Name = "Admin-Id")] int adminId, [FromHeader(Name = "Admin-Key")] string key)
         {
+            if (key != "ADMIN") return Unauthorized();
+            
+            var admin = await _context.Usuarios.FindAsync(adminId);
+            if (admin == null || admin.Rol != "ADMIN") return Unauthorized();
+
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario == null) return NotFound();
 
@@ -114,25 +140,77 @@ namespace AtlasAPI.Controllers
             return NoContent();
         }
 
-        //PARA EL LOGIN:
-
-        // 7. LOGIN DE USUARIO (Verificar nombre y contraseña)
+        // 7. LOGIN DE USUARIO (Con Verificación de Hash y Ban)
         [HttpPost("login")]
-        public async Task<ActionResult<Usuario>> Login([FromBody] Usuario loginRequest)
+        public async Task<ActionResult<UsuarioDto>> Login([FromBody] Usuario loginRequest)
         {
-            // Buscamos un usuario que coincida en nombre Y contraseña
+            // 1. Buscar solo por nombre
             var usuario = await _context.Usuarios
                 .Include(u => u.Logros)
-                .FirstOrDefaultAsync(u => u.Nombre == loginRequest.Nombre && u.Password == loginRequest.Password);
+                .FirstOrDefaultAsync(u => u.Nombre == loginRequest.Nombre);
 
-            if (usuario == null)
+            // 2. Verificar si existe y si la contraseña coincide (BCrypt)
+            if (usuario == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, usuario.PasswordHash))
             {
-                // Si no existe o la contraseña está mal, devolvemos 401 Unauthorized
                 return Unauthorized(new { mensaje = "Credenciales incorrectas" });
             }
 
-            // Si todo es correcto, devolvemos el usuario completo para que Android guarde su progreso
-            return Ok(usuario);
+            // 3. Verificar si está baneado
+            if (usuario.EstaBaneado)
+            {
+                return Unauthorized(new { mensaje = "Tu cuenta ha sido suspendida (Baneado)" });
+            }
+
+            // 4. Devolver DTO seguro
+            return Ok(MapToDto(usuario));
+        }
+
+        // ADMIN: BANEAR
+        [HttpPut("{id}/ban")]
+        public async Task<IActionResult> BanUsuario(int id, [FromHeader(Name = "Admin-Id")] int adminId, [FromHeader(Name = "Admin-Key")] string key)
+        {
+            if (key != "ADMIN") return Unauthorized();
+            
+            var admin = await _context.Usuarios.FindAsync(adminId);
+            if (admin == null || admin.Rol != "ADMIN") return Unauthorized();
+            
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario == null) return NotFound();
+
+            usuario.EstaBaneado = true;
+            await _context.SaveChangesAsync();
+            return Ok(new { mensaje = $"Usuario {usuario.Nombre} baneado" });
+        }
+
+        // ADMIN: DESBANEAR
+        [HttpPut("{id}/unban")]
+        public async Task<IActionResult> UnbanUsuario(int id, [FromHeader(Name = "Admin-Id")] int adminId, [FromHeader(Name = "Admin-Key")] string key)
+        {
+            if (key != "ADMIN") return Unauthorized();
+
+            var admin = await _context.Usuarios.FindAsync(adminId);
+            if (admin == null || admin.Rol != "ADMIN") return Unauthorized();
+
+            var usuario = await _context.Usuarios.FindAsync(id);
+            if (usuario == null) return NotFound();
+
+            usuario.EstaBaneado = false;
+            await _context.SaveChangesAsync();
+            return Ok(new { mensaje = $"Usuario {usuario.Nombre} activado de nuevo" });
+        }
+
+        private UsuarioDto MapToDto(Usuario u)
+        {
+            return new UsuarioDto
+            {
+                Id = u.Id,
+                Nombre = u.Nombre,
+                Rol = u.Rol,
+                Nivel = u.Nivel,
+                Experiencia = u.Experiencia,
+                Avatar = u.Avatar,
+                Logros = u.Logros
+            };
         }
 
         [HttpPost("sumarExperiencia/{id}")]
@@ -171,8 +249,8 @@ namespace AtlasAPI.Controllers
 
             await _context.SaveChangesAsync();
             
-            // Devolvemos un objeto compuesto: Usuario + Lista de nuevos logros
-            return Ok(new { Usuario = usuario, NuevosLogros = nuevosLogros });
+            // Devolvemos DTO para no exponer campos sensibles
+            return Ok(new { Usuario = MapToDto(usuario), NuevosLogros = nuevosLogros });
         }
 
         //IA

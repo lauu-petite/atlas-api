@@ -33,7 +33,7 @@ app.UseSwaggerUI(c =>
     c.RoutePrefix = string.Empty; // Swagger aparecerá en la raíz de la URL
 });
 
-// 4. Lógica de inicialización de base de datos
+// 4. Lógica de inicialización de base de datos profesional
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -41,53 +41,21 @@ using (var scope = app.Services.CreateScope())
 
     try
     {
-        var connection = context.Database.GetDbConnection();
-        await connection.OpenAsync();
-
-        using (var command = connection.CreateCommand())
-        {
-            // Crear tabla Mapas
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Mapas (
-                    Id INT PRIMARY KEY,
-                    Nombre LONGTEXT,
-                    Descripcion LONGTEXT,
-                    AnioReferencia INT DEFAULT 0,
-                    UrlGeoJson LONGTEXT,
-                    Leyenda LONGTEXT
-                );";
-            await command.ExecuteNonQueryAsync();
-
-            // Crear tabla Eventos
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Eventos (
-                    Id INT PRIMARY KEY AUTO_INCREMENT,
-                    Anio INT,
-                    Titulo LONGTEXT,
-                    Descripcion LONGTEXT,
-                    Tipo LONGTEXT,
-                    Latitud DOUBLE,
-                    Longitud DOUBLE,
-                    CategoriaNombre LONGTEXT,
-                    CategoriaColor LONGTEXT,
-                    CategoriaIconoUrl LONGTEXT,
-                    MapaId INT,
-                    CONSTRAINT FK_Eventos_Mapas FOREIGN KEY (MapaId) REFERENCES Mapas(Id) ON DELETE CASCADE
-                );";
-            await command.ExecuteNonQueryAsync();
-            Console.WriteLine("Tablas verificadas correctamente.");
-        }
+        // Aplicar migraciones automáticamente al arrancar
+        Console.WriteLine("Verificando y aplicando migraciones...");
+        await context.Database.MigrateAsync();
+        Console.WriteLine("Migraciones al día.");
 
         // Crear mapa base si no existe
-        if (!context.Mapas.Any())
+        if (!await context.Mapas.AnyAsync())
         {
             context.Mapas.Add(new Mapa { Id = 1, Nombre = "Hispania", Descripcion = "Mapa base de la península" });
             await context.SaveChangesAsync();
             Console.WriteLine("Mapa por defecto creado.");
         }
 
-        // Cargar eventos solo si la tabla está vacía para evitar saturación
-        if (!context.Eventos.Any())
+        // Cargar eventos si está vacía
+        if (!await context.Eventos.AnyAsync())
         {
             var loader = services.GetRequiredService<EventoJsonLoader>();
             await loader.LoadAsync();
@@ -96,7 +64,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        Console.WriteLine("Error al sincronizar base de datos: " + ex.Message);
+        Console.WriteLine("Aviso en inicialización: " + ex.Message);
     }
 }
 
