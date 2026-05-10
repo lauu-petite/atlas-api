@@ -45,11 +45,6 @@ namespace AtlasAPI.Services
 
                 // 3. CARGAR JSON
                 string path = Path.Combine(AppContext.BaseDirectory, "Data", "eventos.json");
-                // Intentar también la ruta de desarrollo por si acaso
-                if (!File.Exists(path)) {
-                    path = @"C:\Users\lauol\Desktop\atlas-api\AtlasAPI\Data\eventos.json";
-                }
-
                 if (File.Exists(path)) {
                     var json = await File.ReadAllTextAsync(path);
                     var dtos = JsonSerializer.Deserialize<List<EventoImportDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });

@@ -2,14 +2,20 @@ using AtlasAPI.Context;
 using AtlasAPI.Services;
 using AtlasAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// 1. Extraer la cadena de conexión
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
+// 2. Configurar el contexto con versión fija para evitar errores de conexión al arrancar
 builder.Services.AddDbContext<ContextoAtlas>(options =>
-    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 30)),
+        mysqlOptions => mysqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)));
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -19,7 +25,15 @@ builder.Services.AddScoped<EventoJsonLoader>();
 
 var app = builder.Build();
 
-// Sembrar datos y verificar tablas
+// 3. Configuración de Swagger fuera de bloques condicionales para Render
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Atlas API V1");
+    c.RoutePrefix = string.Empty; // Swagger aparecerá en la raíz de la URL
+});
+
+// 4. Lógica de inicialización de base de datos profesional
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -92,7 +106,7 @@ using (var scope = app.Services.CreateScope())
         {
             context.Mapas.Add(new Mapa { Id = 1, Nombre = "Hispania", Descripcion = "Mapa base de la península" });
             await context.SaveChangesAsync();
-            Console.WriteLine("✅ Mapa por defecto creado.");
+            Console.WriteLine("Mapa por defecto creado.");
         }
 
         // Limpiar y cargar eventos
@@ -104,7 +118,7 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"⚠️ Error al sincronizar base de datos: {ex.Message}");
+        Console.WriteLine("Aviso en inicialización: " + ex.Message);
     }
 }
 

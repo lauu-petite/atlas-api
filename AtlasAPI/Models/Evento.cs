@@ -16,7 +16,7 @@ namespace AtlasAPI.Models
         public string ImagenEvento { get; set; } = string.Empty;
         public string Periodo { get; set; } = string.Empty;
 
-        // Relación 1-N: Un evento pertenece a un mapa
+        // RRelación 1-N: Un evento pertenece a un mapa
         public int MapaId { get; set; }
         public Mapa? Mapa { get; set; }
 

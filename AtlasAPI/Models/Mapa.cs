@@ -15,7 +15,7 @@ namespace AtlasAPI.Models
         [Column(TypeName = "jsonb")]
         public string Leyenda { get; set; } = string.Empty; // Guardará JSON con colores e iconos
 
-        // Relación 1-N: Un mapa tiene muchos eventos
+        // Relaación 1-N: Un mapa tiene muchos eventos
         public ICollection<Evento> Eventos { get; set; } = new List<Evento>();
     }
 }
