@@ -41,7 +41,8 @@ namespace AtlasAPI.Controllers
                 Descripcion = e.Descripcion,
                 CategoriaNombre = e.CategoriaNombre,
                 CategoriaColor = e.CategoriaColor,
-                CategoriaIconoUrl = e.CategoriaIconoUrl
+                ImagenEvento = e.ImagenEvento,
+                Periodo = e.Periodo
             }).ToList();
 
             return Ok(dtos);

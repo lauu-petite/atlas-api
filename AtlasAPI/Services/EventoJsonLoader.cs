@@ -35,7 +35,8 @@ namespace AtlasAPI.Services
                     Longitud = -3.70,
                     CategoriaNombre = "Política",
                     CategoriaColor = "#27ae60",
-                    CategoriaIconoUrl = "✅",
+                    ImagenEvento = "https://example.com/image.png",
+                    Periodo = "Actualidad",
                     MapaId = 1
                 };
                 _context.Eventos.Add(prueba);
@@ -43,7 +44,12 @@ namespace AtlasAPI.Services
                 Console.WriteLine("📌 Evento de prueba creado en la base de datos.");
 
                 // 3. CARGAR JSON
-                string path = @"C:\Users\desarrollo\source\repos\AtlasAPI\AtlasAPI\Data\eventos.json";
+                string path = Path.Combine(AppContext.BaseDirectory, "Data", "eventos.json");
+                // Intentar también la ruta de desarrollo por si acaso
+                if (!File.Exists(path)) {
+                    path = @"C:\Users\lauol\Desktop\atlas-api\AtlasAPI\Data\eventos.json";
+                }
+
                 if (File.Exists(path)) {
                     var json = await File.ReadAllTextAsync(path);
                     var dtos = JsonSerializer.Deserialize<List<EventoImportDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -58,7 +64,8 @@ namespace AtlasAPI.Services
                             Longitud = d.Longitud,
                             CategoriaNombre = d.CategoriaNombre,
                             CategoriaColor = d.CategoriaColor,
-                            CategoriaIconoUrl = d.CategoriaIconoUrl,
+                            ImagenEvento = d.ImagenEvento,
+                            Periodo = d.Periodo,
                             MapaId = d.MapaId
                         }).ToList();
                         

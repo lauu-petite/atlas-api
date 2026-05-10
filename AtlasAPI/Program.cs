@@ -6,32 +6,30 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-// 1. Extraer la cadena de conexión del JSON
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
-// 2. Configurar el contexto para usar MySQL con esa cadena
 builder.Services.AddDbContext<ContextoAtlas>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<HistoriaService>();
 builder.Services.AddScoped<EventoJsonLoader>();
+
 var app = builder.Build();
 
-// Sembrar datos desde JSON si es necesario
+// Sembrar datos y verificar tablas
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<ContextoAtlas>();
-    
+
     try
     {
-        // Forzar creación de tablas manualmente si EnsureCreated falla
         var connection = context.Database.GetDbConnection();
         await connection.OpenAsync();
-        
+
         using (var command = connection.CreateCommand())
         {
             // 1. Crear tabla Mapas
@@ -46,7 +44,7 @@ using (var scope = app.Services.CreateScope())
                 );";
             await command.ExecuteNonQueryAsync();
 
-            // 2. Crear tabla Eventos con todas las columnas necesarias
+            // 2. Crear tabla Eventos
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Eventos (
                     Id INT PRIMARY KEY AUTO_INCREMENT,
@@ -58,12 +56,35 @@ using (var scope = app.Services.CreateScope())
                     Longitud DOUBLE,
                     CategoriaNombre LONGTEXT,
                     CategoriaColor LONGTEXT,
-                    CategoriaIconoUrl LONGTEXT,
+                    ImagenEvento LONGTEXT,
+                    Periodo LONGTEXT,
                     MapaId INT,
                     CONSTRAINT FK_Eventos_Mapas FOREIGN KEY (MapaId) REFERENCES Mapas(Id) ON DELETE CASCADE
                 );";
             await command.ExecuteNonQueryAsync();
-            Console.WriteLine("✅ Tablas verificadas/creadas correctamente.");
+
+            // MIGRACIÓN MANUAL: Si existe CategoriaIconoUrl, renombrar/cambiar campos
+            try {
+                command.CommandText = "ALTER TABLE Eventos DROP COLUMN CategoriaIconoUrl;";
+                await command.ExecuteNonQueryAsync();
+                
+                command.CommandText = "ALTER TABLE Eventos ADD COLUMN ImagenEvento LONGTEXT, ADD COLUMN Periodo LONGTEXT;";
+                await command.ExecuteNonQueryAsync();
+                Console.WriteLine("✅ Tabla Eventos migrada correctamente (eliminado CategoriaIconoUrl, añadidos ImagenEvento y Periodo).");
+            } catch { /* Ignorar si ya se hizo o si falla por no existir la columna vieja */ }
+
+            // 3. NUEVO: Crear tabla Usuarios (La que faltaba)
+            command.CommandText = @"
+                CREATE TABLE IF NOT EXISTS Usuarios (
+                    Id INT PRIMARY KEY AUTO_INCREMENT,
+                    Nombre LONGTEXT,
+                    Email LONGTEXT,
+                    Password LONGTEXT,
+                    FechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP
+                );";
+            await command.ExecuteNonQueryAsync();
+
+            Console.WriteLine("✅ Todas las tablas (incluyendo Usuarios) verificadas correctamente.");
         }
 
         // Asegurar que existe al menos un mapa
@@ -77,7 +98,7 @@ using (var scope = app.Services.CreateScope())
         // Limpiar y cargar eventos
         context.Eventos.RemoveRange(context.Eventos);
         await context.SaveChangesAsync();
-        
+
         var loader = services.GetRequiredService<EventoJsonLoader>();
         await loader.LoadAsync();
     }
@@ -87,20 +108,14 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-// app.UseHttpsRedirection();
+// Swagger habilitado siempre para que no de problemas en Docker
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseAuthorization();
-
 app.MapControllers();
 
 Console.WriteLine("🚀 Iniciando Atlas API...");
-Console.WriteLine("🔗 Swagger disponible en: http://localhost:5223/swagger");
+Console.WriteLine("🔗 Puerto interno: 5223");
 
 app.Run("http://0.0.0.0:5223");

@@ -9,6 +9,7 @@ namespace AtlasAPI.Models
         public string Descripcion { get; set; } = string.Empty;
         public string CategoriaNombre { get; set; } = string.Empty;
         public string CategoriaColor { get; set; } = string.Empty;
-        public string CategoriaIconoUrl { get; set; } = string.Empty;
+        public string ImagenEvento { get; set; } = string.Empty;
+        public string Periodo { get; set; } = string.Empty;
     }
 }
