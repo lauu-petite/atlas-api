@@ -71,7 +71,7 @@ using (var scope = app.Services.CreateScope())
                     CategoriaNombre LONGTEXT,
                     CategoriaColor LONGTEXT,
                     ImagenEvento LONGTEXT,
-                    Periodo LONGTEXT,
+                    Periodo INT,
                     MapaId INT,
                     CONSTRAINT FK_Eventos_Mapas FOREIGN KEY (MapaId) REFERENCES Mapas(Id) ON DELETE CASCADE
                 );";
@@ -82,7 +82,7 @@ using (var scope = app.Services.CreateScope())
                 command.CommandText = "ALTER TABLE Eventos DROP COLUMN CategoriaIconoUrl;";
                 await command.ExecuteNonQueryAsync();
                 
-                command.CommandText = "ALTER TABLE Eventos ADD COLUMN ImagenEvento LONGTEXT, ADD COLUMN Periodo LONGTEXT;";
+                command.CommandText = "ALTER TABLE Eventos ADD COLUMN ImagenEvento LONGTEXT, ADD COLUMN Periodo INT;";
                 await command.ExecuteNonQueryAsync();
                 Console.WriteLine("✅ Tabla Eventos migrada correctamente (eliminado CategoriaIconoUrl, añadidos ImagenEvento y Periodo).");
             } catch { /* Ignorar si ya se hizo o si falla por no existir la columna vieja */ }

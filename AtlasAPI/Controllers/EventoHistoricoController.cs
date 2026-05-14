@@ -35,6 +35,7 @@ namespace AtlasAPI.Controllers
             var dtos = eventos.Select(e => new EventoHistoricoDTO
             {
                 Id = e.Id,
+                Anio = e.Anio,
                 Nombre = e.Titulo,
                 Lat = e.Latitud,
                 Lon = e.Longitud,

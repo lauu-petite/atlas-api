@@ -36,7 +36,7 @@ namespace AtlasAPI.Services
                     CategoriaNombre = "Política",
                     CategoriaColor = "#27ae60",
                     ImagenEvento = "https://example.com/image.png",
-                    Periodo = "Actualidad",
+                    Periodo = 2026,
                     MapaId = 1
                 };
                 _context.Eventos.Add(prueba);
