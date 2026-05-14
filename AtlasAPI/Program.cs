@@ -84,6 +84,11 @@ using (var scope = app.Services.CreateScope())
                 
                 command.CommandText = "ALTER TABLE Eventos ADD COLUMN ImagenEvento LONGTEXT, ADD COLUMN Periodo INT;";
                 await command.ExecuteNonQueryAsync();
+
+                // Asegurar que si ya existía como texto, se convierta a INT
+                command.CommandText = "ALTER TABLE Eventos MODIFY COLUMN Periodo INT;";
+                await command.ExecuteNonQueryAsync();
+
                 Console.WriteLine("✅ Tabla Eventos migrada correctamente (eliminado CategoriaIconoUrl, añadidos ImagenEvento y Periodo).");
             } catch { /* Ignorar si ya se hizo o si falla por no existir la columna vieja */ }
 
