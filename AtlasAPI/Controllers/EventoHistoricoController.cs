@@ -21,7 +21,7 @@ namespace AtlasAPI.Controllers
 
         // GET: api/eventos/{anio}
         [HttpGet("{anio}")]
-        public async Task<ActionResult<IEnumerable<EventoHistoricoDTO>>> GetEventosPorAnio(int anio)
+        public async Task<ActionResult<IEnumerable<EventoDTO>>> GetEventosPorAnio(int anio)
         {
             var eventos = await _context.Eventos
                 .Where(e => e.Anio == anio)
@@ -29,16 +29,16 @@ namespace AtlasAPI.Controllers
 
             if (eventos == null || !eventos.Any())
             {
-                return Ok(new List<EventoHistoricoDTO>());
+                return Ok(new List<EventoDTO>());
             }
 
-            var dtos = eventos.Select(e => new EventoHistoricoDTO
+            var dtos = eventos.Select(e => new EventoDTO
             {
                 Id = e.Id,
                 Anio = e.Anio,
-                Nombre = e.Titulo,
-                Lat = e.Latitud,
-                Lon = e.Longitud,
+                Titulo = e.Titulo,
+                Latitud = e.Latitud,
+                Longitud = e.Longitud,
                 Descripcion = e.Descripcion,
                 CategoriaNombre = e.CategoriaNombre,
                 CategoriaColor = e.CategoriaColor,

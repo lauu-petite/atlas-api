@@ -47,7 +47,7 @@ namespace AtlasAPI.Services
                 string path = Path.Combine(AppContext.BaseDirectory, "Data", "eventos.json");
                 if (File.Exists(path)) {
                     var json = await File.ReadAllTextAsync(path);
-                    var dtos = JsonSerializer.Deserialize<List<EventoImportDto>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    var dtos = JsonSerializer.Deserialize<List<EventoDTO>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                     
                     if (dtos != null && dtos.Any()) {
                         var nuevos = dtos.Select(d => new Evento {
@@ -61,7 +61,7 @@ namespace AtlasAPI.Services
                             CategoriaColor = d.CategoriaColor,
                             ImagenEvento = d.ImagenEvento,
                             Periodo = d.Periodo,
-                            MapaId = d.MapaId
+                            MapaId = d.MapaId == 0 ? 1 : d.MapaId
                         }).ToList();
                         
                         _context.Eventos.AddRange(nuevos);
