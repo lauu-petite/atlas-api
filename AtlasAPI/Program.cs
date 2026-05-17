@@ -2,6 +2,9 @@ using AtlasAPI.Context;
 using AtlasAPI.Services;
 using AtlasAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +26,24 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<HistoriaService>();
 builder.Services.AddScoped<EventoJsonLoader>();
 
+// JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"]!;
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // 3. Configuración de Swagger fuera de bloques condicionales para Render
@@ -32,6 +53,9 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Atlas API V1");
     c.RoutePrefix = string.Empty; // Swagger aparecerá en la raíz de la URL
 });
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // 4. Lógica de inicialización de base de datos profesional
 using (var scope = app.Services.CreateScope())

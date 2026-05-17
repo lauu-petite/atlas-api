@@ -1,8 +1,13 @@
 using AtlasAPI.Context;
 using AtlasAPI.Models;
 using AtlasAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace AtlasAPI.Controllers
@@ -13,13 +18,17 @@ namespace AtlasAPI.Controllers
     {
         private readonly ContextoAtlas _context;
         private readonly HistoriaService _historiaService;
-        public UsuariosController(ContextoAtlas context, HistoriaService historiaService)
+        private readonly IConfiguration _configuration;
+
+        public UsuariosController(ContextoAtlas context, HistoriaService historiaService, IConfiguration configuration)
         {
             _context = context;
             _historiaService = historiaService;
+            _configuration = configuration;
         }
 
         // 1. OBTENER TODOS LOS JUGADORES (MODO ADMIN)
+        [Authorize(Roles = "ADMIN")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UsuarioDto>>> GetUsuarios([FromHeader(Name = "Admin-Id")] int adminId, [FromHeader(Name = "Admin-Key")] string key)
         {
@@ -125,6 +134,7 @@ namespace AtlasAPI.Controllers
         }
 
         // 6. BORRAR CUENTA (ADMIN)
+        [Authorize(Roles = "ADMIN")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUsuario(int id, [FromHeader(Name = "Admin-Id")] int adminId, [FromHeader(Name = "Admin-Key")] string key)
         {
@@ -164,11 +174,39 @@ namespace AtlasAPI.Controllers
                 return Unauthorized(new { mensaje = "Tu cuenta ha sido suspendida (Baneado)" });
             }
 
-            // 4. Devolver DTO seguro
-            return Ok(MapToDto(usuario));
+            // 4. Generar JWT y devolver DTO con token
+            var dto = MapToDto(usuario);
+            dto.Token = GenerarToken(usuario);
+            return Ok(dto);
+        }
+
+        private string GenerarToken(Usuario usuario)
+        {
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            var expiracion = DateTime.UtcNow.AddDays(int.Parse(_configuration["Jwt:ExpirationDays"] ?? "30"));
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
+                new Claim(ClaimTypes.Name, usuario.Nombre),
+                new Claim(ClaimTypes.Role, usuario.Rol),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: _configuration["Jwt:Issuer"],
+                audience: _configuration["Jwt:Audience"],
+                claims: claims,
+                expires: expiracion,
+                signingCredentials: creds
+            );
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         // ADMIN: BANEAR
+        [Authorize(Roles = "ADMIN")]
         [HttpPut("{id}/ban")]
         public async Task<IActionResult> BanUsuario(int id, [FromHeader(Name = "Admin-Id")] int adminId, [FromHeader(Name = "Admin-Key")] string key)
         {
@@ -186,6 +224,7 @@ namespace AtlasAPI.Controllers
         }
 
         // ADMIN: DESBANEAR
+        [Authorize(Roles = "ADMIN")]
         [HttpPut("{id}/unban")]
         public async Task<IActionResult> UnbanUsuario(int id, [FromHeader(Name = "Admin-Id")] int adminId, [FromHeader(Name = "Admin-Key")] string key)
         {

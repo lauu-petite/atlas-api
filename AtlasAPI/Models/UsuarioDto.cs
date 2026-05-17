@@ -10,5 +10,6 @@ namespace AtlasAPI.Models
         public string Avatar { get; set; } = "isabel";
         public List<Logro> Logros { get; set; } = new();
         public List<int> EventosFavoritosIds { get; set; } = new();
+        public string? Token { get; set; }
     }
 }
