@@ -58,10 +58,6 @@ namespace AtlasAPI.Migrations
                     b.Property<int>("MapaId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Tipo")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("Titulo")
                         .IsRequired()
                         .HasColumnType("longtext");

@@ -30,13 +30,11 @@ namespace AtlasAPI.Services
                     Anio = 2026,
                     Titulo = "Conexión Establecida",
                     Descripcion = "Si ves esto, la base de datos está funcionando correctamente.",
-                    Tipo = "Sistema",
                     Latitud = 40.41,
                     Longitud = -3.70,
                     CategoriaNombre = "Política",
                     CategoriaColor = "#27ae60",
                     ImagenEvento = "https://example.com/image.png",
-                    Periodo = 2026,
                     MapaId = 1
                 };
                 _context.Eventos.Add(prueba);
@@ -54,13 +52,11 @@ namespace AtlasAPI.Services
                             Anio = d.Anio,
                             Titulo = d.Titulo,
                             Descripcion = d.Descripcion,
-                            Tipo = d.Tipo,
                             Latitud = d.Latitud,
                             Longitud = d.Longitud,
                             CategoriaNombre = d.CategoriaNombre,
                             CategoriaColor = d.CategoriaColor,
                             ImagenEvento = d.ImagenEvento,
-                            Periodo = d.Periodo,
                             MapaId = d.MapaId == 0 ? 1 : d.MapaId
                         }).ToList();
                         
