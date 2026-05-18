@@ -41,32 +41,8 @@ namespace AtlasAPI.Services
                 await _context.SaveChangesAsync();
                 Console.WriteLine("📌 Evento de prueba creado en la base de datos.");
 
-                // 3. CARGAR JSON
-                string path = Path.Combine(AppContext.BaseDirectory, "Data", "eventos.json");
-                if (File.Exists(path)) {
-                    var json = await File.ReadAllTextAsync(path);
-                    var dtos = JsonSerializer.Deserialize<List<EventoDTO>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                    
-                    if (dtos != null && dtos.Any()) {
-                        var nuevos = dtos.Select(d => new Evento {
-                            Anio = d.Anio,
-                            Titulo = d.Titulo,
-                            Descripcion = d.Descripcion,
-                            Latitud = d.Latitud,
-                            Longitud = d.Longitud,
-                            CategoriaNombre = d.CategoriaNombre,
-                            CategoriaColor = d.CategoriaColor,
-                            ImagenEvento = d.ImagenEvento,
-                            MapaId = d.MapaId == 0 ? 1 : d.MapaId
-                        }).ToList();
-                        
-                        _context.Eventos.AddRange(nuevos);
-                        await _context.SaveChangesAsync();
-                        Console.WriteLine($"✅ ¡SÍ! Se han cargado {nuevos.Count} eventos adicionales desde el JSON.");
-                    }
-                } else {
-                    Console.WriteLine($"❌ No se encontró el JSON en {path}, pero el evento de prueba debería estar listo.");
-                }
+                // 3. CARGAR JSON (FUNCIONALIDAD ELIMINADA POR REQUISITO DEL USUARIO)
+                Console.WriteLine("Funcionalidad de carga de eventos desde JSON eliminada por requisito del usuario.");
             }
             catch (Exception ex)
             {
