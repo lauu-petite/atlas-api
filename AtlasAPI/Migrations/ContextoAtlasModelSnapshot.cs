@@ -37,15 +37,15 @@ namespace AtlasAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("CategoriaIconoUrl")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
                     b.Property<string>("CategoriaNombre")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ImagenEvento")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -110,8 +110,15 @@ namespace AtlasAPI.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("AnioReferencia")
+                    b.Property<int>("AnioFin")
                         .HasColumnType("int");
+
+                    b.Property<int>("AnioInicio")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ArchivoHtml")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
@@ -119,13 +126,9 @@ namespace AtlasAPI.Migrations
 
                     b.Property<string>("Leyenda")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("json");
 
                     b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<string>("UrlGeoJson")
                         .IsRequired()
                         .HasColumnType("longtext");
 

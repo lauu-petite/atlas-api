@@ -17,7 +17,7 @@ namespace AtlasAPI.Models
         // Identificador del archivo local en Android (ej: "hispania206")
         public string ArchivoHtml { get; set; } = string.Empty;
 
-        [Column(TypeName = "jsonb")]
+        [Column(TypeName = "json")]
         public string Leyenda { get; set; } = string.Empty; // Array JSON de colores y nombres
 
         // Relación 1-N: Un mapa tiene muchos eventos

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AtlasAPI.Migrations
 {
     [DbContext(typeof(ContextoAtlas))]
-    [Migration("20260312082954_AddSigloYCategoriaAPreguntasV2")]
-    partial class AddSigloYCategoriaAPreguntasV2
+    [Migration("20260518081421_NuevaEstructuraLimpia")]
+    partial class NuevaEstructuraLimpia
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,19 @@ namespace AtlasAPI.Migrations
                     b.Property<int>("Anio")
                         .HasColumnType("int");
 
+                    b.Property<string>("CategoriaColor")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("CategoriaNombre")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
                     b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("ImagenEvento")
                         .IsRequired()
                         .HasColumnType("longtext");
 
@@ -46,15 +58,16 @@ namespace AtlasAPI.Migrations
                     b.Property<double>("Longitud")
                         .HasColumnType("double");
 
-                    b.Property<string>("Tipo")
-                        .IsRequired()
-                        .HasColumnType("longtext");
+                    b.Property<int>("MapaId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Titulo")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MapaId");
 
                     b.ToTable("Eventos");
                 });
@@ -82,7 +95,7 @@ namespace AtlasAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<int>("UsuarioId")
+                    b.Property<int?>("UsuarioId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -90,6 +103,41 @@ namespace AtlasAPI.Migrations
                     b.HasIndex("UsuarioId");
 
                     b.ToTable("Logros");
+                });
+
+            modelBuilder.Entity("AtlasAPI.Models.Mapa", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AnioFin")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AnioInicio")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ArchivoHtml")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Leyenda")
+                        .IsRequired()
+                        .HasColumnType("json");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Mapas");
                 });
 
             modelBuilder.Entity("AtlasAPI.Models.Partida", b =>
@@ -165,6 +213,28 @@ namespace AtlasAPI.Migrations
                     b.ToTable("Preguntas");
                 });
 
+            modelBuilder.Entity("AtlasAPI.Models.RespuestaPartida", b =>
+                {
+                    b.Property<int>("PartidaId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PreguntaId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("EsAcertada")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("RespuestaSeleccionada")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.HasKey("PartidaId", "PreguntaId");
+
+                    b.HasIndex("PreguntaId");
+
+                    b.ToTable("RespuestasPartida");
+                });
+
             modelBuilder.Entity("AtlasAPI.Models.Usuario", b =>
                 {
                     b.Property<int>("Id")
@@ -177,6 +247,9 @@ namespace AtlasAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
+                    b.Property<bool>("EstaBaneado")
+                        .HasColumnType("tinyint(1)");
+
                     b.Property<int>("Experiencia")
                         .HasColumnType("int");
 
@@ -187,13 +260,35 @@ namespace AtlasAPI.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("Password")
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Rol")
                         .IsRequired()
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
                     b.ToTable("Usuarios");
+                });
+
+            modelBuilder.Entity("AtlasAPI.Models.UsuarioEventoFavorito", b =>
+                {
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("EventoId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("FechaGuardado")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("UsuarioId", "EventoId");
+
+                    b.HasIndex("EventoId");
+
+                    b.ToTable("UsuarioEventoFavoritos");
                 });
 
             modelBuilder.Entity("AtlasAPI.Models.UsuarioLogro", b =>
@@ -222,13 +317,60 @@ namespace AtlasAPI.Migrations
                     b.ToTable("UsuariosLogros");
                 });
 
+            modelBuilder.Entity("AtlasAPI.Models.Evento", b =>
+                {
+                    b.HasOne("AtlasAPI.Models.Mapa", "Mapa")
+                        .WithMany("Eventos")
+                        .HasForeignKey("MapaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mapa");
+                });
+
             modelBuilder.Entity("AtlasAPI.Models.Logro", b =>
                 {
                     b.HasOne("AtlasAPI.Models.Usuario", null)
                         .WithMany("Logros")
+                        .HasForeignKey("UsuarioId");
+                });
+
+            modelBuilder.Entity("AtlasAPI.Models.RespuestaPartida", b =>
+                {
+                    b.HasOne("AtlasAPI.Models.Partida", "Partida")
+                        .WithMany("RespuestasPartida")
+                        .HasForeignKey("PartidaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AtlasAPI.Models.PreguntaQuiz", "Pregunta")
+                        .WithMany("RespuestasPartida")
+                        .HasForeignKey("PreguntaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Partida");
+
+                    b.Navigation("Pregunta");
+                });
+
+            modelBuilder.Entity("AtlasAPI.Models.UsuarioEventoFavorito", b =>
+                {
+                    b.HasOne("AtlasAPI.Models.Evento", "Evento")
+                        .WithMany("UsuariosFavoritos")
+                        .HasForeignKey("EventoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AtlasAPI.Models.Usuario", "Usuario")
+                        .WithMany("EventosFavoritos")
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Evento");
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("AtlasAPI.Models.UsuarioLogro", b =>
@@ -250,8 +392,30 @@ namespace AtlasAPI.Migrations
                     b.Navigation("Usuario");
                 });
 
+            modelBuilder.Entity("AtlasAPI.Models.Evento", b =>
+                {
+                    b.Navigation("UsuariosFavoritos");
+                });
+
+            modelBuilder.Entity("AtlasAPI.Models.Mapa", b =>
+                {
+                    b.Navigation("Eventos");
+                });
+
+            modelBuilder.Entity("AtlasAPI.Models.Partida", b =>
+                {
+                    b.Navigation("RespuestasPartida");
+                });
+
+            modelBuilder.Entity("AtlasAPI.Models.PreguntaQuiz", b =>
+                {
+                    b.Navigation("RespuestasPartida");
+                });
+
             modelBuilder.Entity("AtlasAPI.Models.Usuario", b =>
                 {
+                    b.Navigation("EventosFavoritos");
+
                     b.Navigation("Logros");
                 });
 #pragma warning restore 612, 618
