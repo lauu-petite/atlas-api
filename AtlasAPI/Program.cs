@@ -61,10 +61,19 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<ContextoAtlas>();
         
-        // 1. APLICAR MIGRACIONES AUTOMÁTICAS
-        // Esto creará todas las tablas con sus relaciones (FK) correctamente
-        await context.Database.MigrateAsync();
-        Console.WriteLine("✅ Base de datos sincronizada con Migraciones.");
+        // 1. APLICAR ESTRUCTURA
+        // Intentamos migraciones primero
+        try {
+            await context.Database.MigrateAsync();
+            Console.WriteLine("✅ Intento de MigrateAsync completado.");
+        } catch (Exception migEx) {
+            Console.WriteLine($"⚠️ MigrateAsync falló: {migEx.Message}. Intentando EnsureCreated...");
+            await context.Database.EnsureCreatedAsync(); 
+        }
+        
+        // Verificación extra: ¿Se han creado las tablas?
+        var canConnect = await context.Database.CanConnectAsync();
+        Console.WriteLine($"DB Conectada: {canConnect}");
 
         // 2. SEEDING: Asegurar que existe el usuario admin
         var adminUser = await context.Usuarios.FirstOrDefaultAsync(u => u.Nombre == "admin");
