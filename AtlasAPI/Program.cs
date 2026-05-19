@@ -138,10 +138,7 @@ using (var scope = app.Services.CreateScope())
             Console.WriteLine("Mapa por defecto creado.");
         }
 
-        // Limpiar y cargar eventos
-        context.Eventos.RemoveRange(context.Eventos);
-        await context.SaveChangesAsync();
-
+        // Ya es seguro habilitar el cargador porque ahora solo actúa si la tabla está vacía
         var loader = services.GetRequiredService<EventoJsonLoader>();
         await loader.LoadAsync();
     }
@@ -158,7 +155,7 @@ app.UseSwaggerUI();
 app.UseAuthorization();
 app.MapControllers();
 
-Console.WriteLine("🚀 Iniciando Atlas API...");
-Console.WriteLine("🔗 Puerto interno: 5223");
+Console.WriteLine("Iniciando Atlas API...");
+Console.WriteLine("Puerto interno: 5223");
 
 app.Run("http://0.0.0.0:5223");

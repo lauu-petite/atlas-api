@@ -18,12 +18,13 @@ namespace AtlasAPI.Services
         {
             try
             {
-                Console.WriteLine("🛠️ Iniciando carga forzada de eventos...");
+                if (await _context.Eventos.AnyAsync())
+                {
+                    Console.WriteLine("⏩ Tabla Eventos ya contiene datos. Saltando carga inicial.");
+                    return;
+                }
 
-                // 1. LIMPIEZA TOTAL
-                await _context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 0;");
-                await _context.Database.ExecuteSqlRawAsync("TRUNCATE TABLE Eventos;");
-                await _context.Database.ExecuteSqlRawAsync("SET FOREIGN_KEY_CHECKS = 1;");
+                Console.WriteLine("🛠️ Cargando evento de prueba (tabla vacía)...");
 
                 // 2. EVENTO DE PRUEBA (Para confirmar que la DB funciona)
                 var prueba = new Evento {
@@ -40,9 +41,6 @@ namespace AtlasAPI.Services
                 _context.Eventos.Add(prueba);
                 await _context.SaveChangesAsync();
                 Console.WriteLine("📌 Evento de prueba creado en la base de datos.");
-
-                // 3. CARGAR JSON (FUNCIONALIDAD ELIMINADA POR REQUISITO DEL USUARIO)
-                Console.WriteLine("Funcionalidad de carga de eventos desde JSON eliminada por requisito del usuario.");
             }
             catch (Exception ex)
             {
