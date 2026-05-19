@@ -9,13 +9,11 @@ using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Extraer la cadena de conexión
+// CONFIGURACIÓN DE BASE DE DATOS (MySQL Aiven)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-// 2. Configurar el contexto con versión fija para evitar errores de conexión al arrancar
 builder.Services.AddDbContext<ContextoAtlas>(options =>
-    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 30)),
-        mysqlOptions => mysqlOptions.EnableRetryOnFailure(
+    options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+        mySqlOptions => mySqlOptions.EnableRetryOnFailure(
             maxRetryCount: 5,
             maxRetryDelay: TimeSpan.FromSeconds(10),
             errorNumbersToAdd: null)));
@@ -27,11 +25,12 @@ builder.Services.AddControllers()
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<HistoriaService>();
-builder.Services.AddScoped<EventoJsonLoader>();
 
-// JWT Authentication
-var jwtKey = builder.Configuration["Jwt:Key"]!;
+// Inyectar Servicios
+builder.Services.AddScoped<EventoJsonLoader>();
+builder.Services.AddScoped<HistoriaService>();
+
+// CONFIGURACIÓN DE JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -43,101 +42,31 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
             ValidAudience = builder.Configuration["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
     });
-builder.Services.AddAuthorization();
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdmin", policy => policy.RequireRole("ADMIN"));
+});
 
 var app = builder.Build();
 
-// 3. Configuración de Swagger fuera de bloques condicionales para Render
-app.UseSwagger();
-app.UseSwaggerUI(c =>
-{
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Atlas API V1");
-    c.RoutePrefix = string.Empty; // Swagger aparecerá en la raíz de la URL
-});
-
-app.UseAuthentication();
-app.UseAuthorization();
-
-// 4. Lógica de inicialización de base de datos profesional
+// --- INICIALIZACIÓN DE DATOS (SEEDING) ---
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<ContextoAtlas>();
-
     try
     {
-        var connection = context.Database.GetDbConnection();
-        await connection.OpenAsync();
+        var context = services.GetRequiredService<ContextoAtlas>();
+        
+        // 1. APLICAR MIGRACIONES AUTOMÁTICAS
+        // Esto creará todas las tablas con sus relaciones (FK) correctamente
+        await context.Database.MigrateAsync();
+        Console.WriteLine("✅ Base de datos sincronizada con Migraciones.");
 
-        using (var command = connection.CreateCommand())
-        {
-            // 1. Crear tabla Mapas
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Mapas (
-                    Id INT PRIMARY KEY,
-                    Nombre LONGTEXT,
-                    Descripcion LONGTEXT,
-                    AnioReferencia INT DEFAULT 0,
-                    UrlGeoJson LONGTEXT,
-                    Leyenda LONGTEXT
-                );";
-            await command.ExecuteNonQueryAsync();
-
-            // 2. Crear tabla Eventos
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Eventos (
-                    Id INT PRIMARY KEY AUTO_INCREMENT,
-                    Anio INT,
-                    Titulo LONGTEXT,
-                    Descripcion LONGTEXT,
-                    Tipo LONGTEXT,
-                    Latitud DOUBLE,
-                    Longitud DOUBLE,
-                    CategoriaNombre LONGTEXT,
-                    CategoriaColor LONGTEXT,
-                    ImagenEvento LONGTEXT,
-                    Periodo INT,
-                    MapaId INT,
-                    CONSTRAINT FK_Eventos_Mapas FOREIGN KEY (MapaId) REFERENCES Mapas(Id) ON DELETE CASCADE
-                );";
-            await command.ExecuteNonQueryAsync();
-
-            // MIGRACIÓN MANUAL: Si existe CategoriaIconoUrl, renombrar/cambiar campos
-            try {
-                command.CommandText = "ALTER TABLE Eventos DROP COLUMN CategoriaIconoUrl;";
-                await command.ExecuteNonQueryAsync();
-                
-                command.CommandText = "ALTER TABLE Eventos ADD COLUMN ImagenEvento LONGTEXT, ADD COLUMN Periodo INT;";
-                await command.ExecuteNonQueryAsync();
-
-                // Asegurar que si ya existía como texto, se convierta a INT
-                command.CommandText = "ALTER TABLE Eventos MODIFY COLUMN Periodo INT;";
-                await command.ExecuteNonQueryAsync();
-
-                Console.WriteLine("✅ Tabla Eventos migrada correctamente (eliminado CategoriaIconoUrl, añadidos ImagenEvento y Periodo).");
-            } catch { /* Ignorar si ya se hizo o si falla por no existir la columna vieja */ }
-
-            // 3. NUEVO: Crear tabla Usuarios (Corregida para coincidir con el modelo)
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS Usuarios (
-                    Id INT PRIMARY KEY AUTO_INCREMENT,
-                    Nombre LONGTEXT,
-                    PasswordHash LONGTEXT,
-                    Rol LONGTEXT,
-                    EstaBaneado TINYINT(1) DEFAULT 0,
-                    Nivel INT DEFAULT 1,
-                    Experiencia INT DEFAULT 0,
-                    Avatar LONGTEXT
-                );";
-            await command.ExecuteNonQueryAsync();
-
-            Console.WriteLine("✅ Todas las tablas (incluyendo Usuarios) verificadas correctamente.");
-        }
-
-        // Asegurar que existe el usuario admin para poder entrar
+        // 2. SEEDING: Asegurar que existe el usuario admin
         var adminUser = await context.Usuarios.FirstOrDefaultAsync(u => u.Nombre == "admin");
         if (adminUser == null)
         {
@@ -157,22 +86,22 @@ using (var scope = app.Services.CreateScope())
         }
         else 
         {
-            // FORZAR ACTUALIZACIÓN DE CONTRASEÑA (Para asegurar que el Hash es correcto)
+            // Asegurar hash correcto para admin
             adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin789");
-            adminUser.Rol = "ADMIN"; // Asegurar que es ADMIN
+            adminUser.Rol = "ADMIN";
             await context.SaveChangesAsync();
-            Console.WriteLine("👤 Contraseña de 'admin' actualizada forzosamente a 'admin789'.");
+            Console.WriteLine("👤 Usuario 'admin' verificado.");
         }
 
-        // Asegurar que existe al menos un mapa
+        // 3. SEEDING: Asegurar que existe al menos un mapa
         if (!context.Mapas.Any())
         {
             context.Mapas.Add(new Mapa { Id = 1, Nombre = "Hispania", Descripcion = "Mapa base de la península" });
             await context.SaveChangesAsync();
-            Console.WriteLine("Mapa por defecto creado.");
+            Console.WriteLine("🗺️ Mapa por defecto creado.");
         }
 
-        // Ya es seguro habilitar el cargador porque ahora solo actúa si la tabla está vacía
+        // 4. CARGAR EVENTOS INICIALES (Si la tabla está vacía)
         var loader = services.GetRequiredService<EventoJsonLoader>();
         await loader.LoadAsync();
     }
@@ -189,7 +118,7 @@ app.UseSwaggerUI();
 app.UseAuthorization();
 app.MapControllers();
 
-Console.WriteLine("Iniciando Atlas API...");
-Console.WriteLine("Puerto interno: 5223");
+Console.WriteLine("🚀 Iniciando Atlas API...");
+Console.WriteLine("🔗 Puerto interno: 5223");
 
 app.Run("http://0.0.0.0:5223");

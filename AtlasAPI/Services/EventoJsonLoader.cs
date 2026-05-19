@@ -24,23 +24,7 @@ namespace AtlasAPI.Services
                     return;
                 }
 
-                Console.WriteLine("🛠️ Cargando evento de prueba (tabla vacía)...");
-
-                // 2. EVENTO DE PRUEBA (Para confirmar que la DB funciona)
-                var prueba = new Evento {
-                    Anio = 2026,
-                    Titulo = "Conexión Establecida",
-                    Descripcion = "Si ves esto, la base de datos está funcionando correctamente.",
-                    Latitud = 40.41,
-                    Longitud = -3.70,
-                    CategoriaNombre = "Política",
-                    CategoriaColor = "#27ae60",
-                    ImagenEvento = "https://example.com/image.png",
-                    MapaId = 1
-                };
-                _context.Eventos.Add(prueba);
-                await _context.SaveChangesAsync();
-                Console.WriteLine("📌 Evento de prueba creado en la base de datos.");
+                Console.WriteLine("🛠️ La tabla de eventos está vacía. Lista para recibir datos manuales.");
             }
             catch (Exception ex)
             {

@@ -214,6 +214,54 @@ namespace AtlasAPI.Controllers
             return Ok(dto);
         }
 
+        // 8. OBTENER FAVORITOS DE UN USUARIO
+        [HttpGet("{id}/favoritos")]
+        public async Task<ActionResult<IEnumerable<Evento>>> GetFavoritos(int id)
+        {
+            var usuario = await _context.Usuarios
+                .Include(u => u.EventosFavoritos)
+                .ThenInclude(f => f.Evento)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (usuario == null) return NotFound("Usuario no encontrado");
+
+            var eventos = usuario.EventosFavoritos.Select(f => f.Evento).ToList();
+            return Ok(eventos);
+        }
+
+        // 9. TOGGLE FAVORITO
+        [HttpPost("{id}/favoritos/{eventoId}")]
+        public async Task<IActionResult> ToggleFavorito(int id, int eventoId)
+        {
+            var usuario = await _context.Usuarios
+                .Include(u => u.EventosFavoritos)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (usuario == null) return NotFound("Usuario no encontrado");
+
+            var favorito = usuario.EventosFavoritos.FirstOrDefault(f => f.EventoId == eventoId);
+
+            if (favorito != null)
+            {
+                // Eliminar de favoritos
+                _context.UsuarioEventoFavoritos.Remove(favorito);
+                await _context.SaveChangesAsync();
+                return Ok(new { mensaje = "Eliminado de favoritos", esFavorito = false });
+            }
+            else
+            {
+                // Añadir a favoritos
+                var nuevoFavorito = new UsuarioEventoFavorito
+                {
+                    UsuarioId = id,
+                    EventoId = eventoId
+                };
+                _context.UsuarioEventoFavoritos.Add(nuevoRegistro: nuevoFavorito);
+                await _context.SaveChangesAsync();
+                return Ok(new { mensaje = "Añadido a favoritos", esFavorito = true });
+            }
+        }
+
         private string GenerarToken(Usuario usuario)
         {
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
