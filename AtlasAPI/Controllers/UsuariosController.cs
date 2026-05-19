@@ -256,7 +256,7 @@ namespace AtlasAPI.Controllers
                     UsuarioId = id,
                     EventoId = eventoId
                 };
-                _context.UsuarioEventoFavoritos.Add(nuevoRegistro: nuevoFavorito);
+                _context.UsuarioEventoFavoritos.Add(nuevoFavorito);
                 await _context.SaveChangesAsync();
                 return Ok(new { mensaje = "Añadido a favoritos", esFavorito = true });
             }
