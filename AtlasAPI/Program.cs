@@ -151,6 +151,14 @@ using (var scope = app.Services.CreateScope())
             await context.SaveChangesAsync();
             Console.WriteLine("👤 Usuario 'admin' creado correctamente.");
         }
+        else 
+        {
+            // FORZAR ACTUALIZACIÓN DE CONTRASEÑA (Para asegurar que el Hash es correcto)
+            adminUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin789");
+            adminUser.Rol = "ADMIN"; // Asegurar que es ADMIN
+            await context.SaveChangesAsync();
+            Console.WriteLine("👤 Contraseña de 'admin' actualizada forzosamente a 'admin789'.");
+        }
 
         // Asegurar que existe al menos un mapa
         if (!context.Mapas.Any())
