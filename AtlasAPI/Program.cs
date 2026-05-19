@@ -116,18 +116,40 @@ using (var scope = app.Services.CreateScope())
                 Console.WriteLine("✅ Tabla Eventos migrada correctamente (eliminado CategoriaIconoUrl, añadidos ImagenEvento y Periodo).");
             } catch { /* Ignorar si ya se hizo o si falla por no existir la columna vieja */ }
 
-            // 3. NUEVO: Crear tabla Usuarios (La que faltaba)
+            // 3. NUEVO: Crear tabla Usuarios (Corregida para coincidir con el modelo)
             command.CommandText = @"
                 CREATE TABLE IF NOT EXISTS Usuarios (
                     Id INT PRIMARY KEY AUTO_INCREMENT,
                     Nombre LONGTEXT,
-                    Email LONGTEXT,
-                    Password LONGTEXT,
-                    FechaRegistro DATETIME DEFAULT CURRENT_TIMESTAMP
+                    PasswordHash LONGTEXT,
+                    Rol LONGTEXT,
+                    EstaBaneado TINYINT(1) DEFAULT 0,
+                    Nivel INT DEFAULT 1,
+                    Experiencia INT DEFAULT 0,
+                    Avatar LONGTEXT
                 );";
             await command.ExecuteNonQueryAsync();
 
             Console.WriteLine("✅ Todas las tablas (incluyendo Usuarios) verificadas correctamente.");
+        }
+
+        // Asegurar que existe el usuario admin para poder entrar
+        var adminUser = await context.Usuarios.FirstOrDefaultAsync(u => u.Nombre == "admin");
+        if (adminUser == null)
+        {
+            var hashedPw = BCrypt.Net.BCrypt.HashPassword("admin789");
+            context.Usuarios.Add(new Usuario 
+            { 
+                Nombre = "admin", 
+                PasswordHash = hashedPw, 
+                Rol = "ADMIN",
+                Avatar = "isabel",
+                Nivel = 100,
+                Experiencia = 0,
+                EstaBaneado = false
+            });
+            await context.SaveChangesAsync();
+            Console.WriteLine("👤 Usuario 'admin' creado correctamente.");
         }
 
         // Asegurar que existe al menos un mapa
