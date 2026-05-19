@@ -154,29 +154,63 @@ namespace AtlasAPI.Controllers
 
         // 7. LOGIN DE USUARIO (Con Verificación de Hash y Ban)
         [HttpPost("login")]
-        public async Task<ActionResult<UsuarioDto>> Login([FromBody] Usuario loginRequest)
+        public async Task<ActionResult<UsuarioDto>> Login([FromBody] LoginDto loginRequest)
         {
-            // 1. Buscar solo por nombre con favoritos
+            // LOG DE AUDITORÍA EXTREMO
+            Console.WriteLine("======================================");
+            Console.WriteLine($"[DEBUG LOGIN] Inicio");
+            Console.WriteLine($"[DEBUG LOGIN] Nombre recibido: '{loginRequest.Nombre}'");
+            Console.WriteLine($"[DEBUG LOGIN] Password recibido (longitud): '{loginRequest.Password?.Length ?? 0}'");
+
+            if (string.IsNullOrEmpty(loginRequest.Nombre))
+            {
+                return BadRequest(new { mensaje = "Nombre es obligatorio" });
+            }
+
+            // 1. Buscar solo por nombre
             var usuario = await _context.Usuarios
-                .Include(u => u.Logros)
-                .Include(u => u.EventosFavoritos)
                 .FirstOrDefaultAsync(u => u.Nombre == loginRequest.Nombre);
 
-            // 2. Verificar si existe y si la contraseña coincide (BCrypt)
-            if (usuario == null || !BCrypt.Net.BCrypt.Verify(loginRequest.Password, usuario.PasswordHash))
+            if (usuario == null)
             {
+                Console.WriteLine($"[DEBUG LOGIN] ERROR: Usuario '{loginRequest.Nombre}' NO EXISTE en la DB.");
+                return Unauthorized(new { mensaje = "Credenciales incorrectas" });
+            }
+
+            Console.WriteLine($"[DEBUG LOGIN] Usuario encontrado. Hash en DB: '{usuario.PasswordHash.Substring(0, Math.Min(10, usuario.PasswordHash.Length))}...'");
+
+            // 2. Verificar si la contraseña coincide
+            if (string.IsNullOrEmpty(loginRequest.Password))
+            {
+                Console.WriteLine("[DEBUG LOGIN] ERROR: La contraseña recibida está VACÍA o es NULL.");
+                return Unauthorized(new { mensaje = "Credenciales incorrectas" });
+            }
+
+            bool passwordValido = false;
+            try {
+                passwordValido = BCrypt.Net.BCrypt.Verify(loginRequest.Password, usuario.PasswordHash);
+            } catch (Exception ex) {
+                Console.WriteLine($"[DEBUG LOGIN] EXCEPCIÓN EN BCRYPT: {ex.Message}");
+            }
+            
+            if (!passwordValido)
+            {
+                Console.WriteLine($"[DEBUG LOGIN] ERROR: Contraseña '{loginRequest.Password}' NO VALIDA contra el hash.");
                 return Unauthorized(new { mensaje = "Credenciales incorrectas" });
             }
 
             // 3. Verificar si está baneado
             if (usuario.EstaBaneado)
             {
-                return Unauthorized(new { mensaje = "Tu cuenta ha sido suspendida (Baneado)" });
+                return Unauthorized(new { mensaje = "Tu cuenta ha sido suspendida" });
             }
 
-            // 4. Generar JWT y devolver DTO con token
+            // 4. Generar DTO
             var dto = MapToDto(usuario);
             dto.Token = GenerarToken(usuario);
+            
+            Console.WriteLine($"[DEBUG LOGIN] ÉXITO: Usuario {loginRequest.Nombre} autenticado.");
+            Console.WriteLine("======================================");
             return Ok(dto);
         }
 
