@@ -31,7 +31,10 @@ namespace AtlasAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<Partida>> PostPartida(Partida partida)
         {
-            partida.Fecha = DateTime.Now; // Asegurar que la fecha es la actual
+            partida.Fecha = DateTime.Now;
+            
+            // Entity Framework guardará automáticamente la lista 'RespuestasPartida'
+            // si la configuración de navegación es correcta.
             _context.Partidas.Add(partida);
             await _context.SaveChangesAsync();
 

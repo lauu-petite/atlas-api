@@ -4,6 +4,8 @@ namespace AtlasAPI.Models
 {
     public class RespuestaPartida
     {
+        public int Id { get; set; } // Añadido para EF
+
         public int PartidaId { get; set; }
         [JsonIgnore]
         public Partida? Partida { get; set; }
@@ -12,7 +14,7 @@ namespace AtlasAPI.Models
         [JsonIgnore]
         public PreguntaQuiz? Pregunta { get; set; }
 
-        public string RespuestaSeleccionada { get; set; } = string.Empty; // Respuesta que eligió el usuario (A, B, C)
+        public string RespuestaSeleccionada { get; set; } = string.Empty; 
         public bool EsAcertada { get; set; }
     }
 }
