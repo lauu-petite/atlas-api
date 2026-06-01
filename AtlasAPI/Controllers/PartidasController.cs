@@ -23,7 +23,6 @@ namespace AtlasAPI.Controllers
             var historial = await _context.Partidas
                 .Where(p => p.UsuarioId == usuarioId)
                 .OrderByDescending(p => p.Fecha)
-                .Take(10) // Mostrar las últimas 10 partidas
                 .ToListAsync();
 
             // Log para depuración detallado al obtener historial
