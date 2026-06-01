@@ -20,21 +20,36 @@ namespace AtlasAPI.Controllers
         [HttpGet("usuario/{usuarioId}")]
         public async Task<ActionResult<IEnumerable<Partida>>> GetHistorial(int usuarioId)
         {
-            return await _context.Partidas
+            var historial = await _context.Partidas
                 .Where(p => p.UsuarioId == usuarioId)
                 .OrderByDescending(p => p.Fecha)
                 .Take(10) // Mostrar las últimas 10 partidas
                 .ToListAsync();
+
+            // Log para depuración detallado al obtener historial
+            Console.WriteLine($"[DEBUG] Obteniendo historial para UsuarioId: {usuarioId}. Se encontraron {historial.Count} partidas.");
+            foreach (var p in historial)
+            {
+                Console.WriteLine($"[DEBUG] Partida ID: {p.Id}, Aciertos: {p.Aciertos}, TotalPreguntas: {p.TotalPreguntas}, Siglo: {p.Siglo}, Fecha: {p.Fecha}");
+            }
+
+            return Ok(historial);
         }
 
         // 2. GUARDAR RESULTADO DE UNA PARTIDA
         [HttpPost]
         public async Task<ActionResult<Partida>> PostPartida(Partida partida)
         {
+            // Log para depuración detallado al guardar
+            Console.WriteLine($"[DEBUG] Intentando guardar Partida:");
+            Console.WriteLine($"[DEBUG]   UsuarioId: {partida.UsuarioId}");
+            Console.WriteLine($"[DEBUG]   Aciertos: {partida.Aciertos}");
+            Console.WriteLine($"[DEBUG]   TotalPreguntas: {partida.TotalPreguntas}");
+            Console.WriteLine($"[DEBUG]   Siglo: {partida.Siglo}");
+            Console.WriteLine($"[DEBUG]   Fecha (antes de asignar): {partida.Fecha}");
+            
             partida.Fecha = DateTime.Now;
             
-            // Entity Framework guardará automáticamente la lista 'RespuestasPartida'
-            // si la configuración de navegación es correcta.
             _context.Partidas.Add(partida);
             await _context.SaveChangesAsync();
 
