@@ -11,9 +11,7 @@ namespace AtlasAPI.Context
         public DbSet<Evento> Eventos { get; set; }
 
         public DbSet<Usuario> Usuarios { get; set; }
-        public DbSet<Logro> Logros { get; set; }
         public DbSet<PreguntaQuiz> Preguntas { get; set; }
-        public DbSet<UsuarioLogro> UsuariosLogros { get; set; }
         public DbSet<Partida> Partidas { get; set; }
         public DbSet<Mapa> Mapas { get; set; }
         public DbSet<RespuestaPartida> RespuestasPartida { get; set; }
@@ -21,12 +19,6 @@ namespace AtlasAPI.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // UsuarioLogro
-            modelBuilder.Entity<UsuarioLogro>()
-                .HasOne(ul => ul.Logro)
-                .WithMany()
-                .HasForeignKey(ul => ul.LogroId);
-
             // Relación N-N: Partida - PreguntaQuiz (RespuestaPartida)
             modelBuilder.Entity<RespuestaPartida>()
                 .HasKey(rp => new { rp.PartidaId, rp.PreguntaId });

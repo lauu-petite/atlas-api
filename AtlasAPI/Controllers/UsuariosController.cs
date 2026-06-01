@@ -40,7 +40,7 @@ namespace AtlasAPI.Controllers
             if (admin == null || admin.Rol != "ADMIN") 
                 return Unauthorized("No tienes permisos de administrador o el ID es inválido");
 
-            var usuarios = await _context.Usuarios.Include(u => u.Logros).ToListAsync();
+            var usuarios = await _context.Usuarios.ToListAsync();
             return Ok(usuarios.Select(MapToDto));
         }
 
@@ -49,7 +49,6 @@ namespace AtlasAPI.Controllers
         public async Task<ActionResult<UsuarioDto>> GetUsuario(int id)
         {
             var usuario = await _context.Usuarios
-                .Include(u => u.Logros)
                 .Include(u => u.EventosFavoritos)
                 .FirstOrDefaultAsync(u => u.Id == id);
 
@@ -115,22 +114,6 @@ namespace AtlasAPI.Controllers
             }
 
             return NoContent();
-        }
-
-        // 5. DAR UN LOGRO A UN USUARIO (Gamificación)
-        [HttpPost("{id}/logros")]
-        public async Task<IActionResult> AddLogro(int id, Logro nuevoLogro)
-        {
-            var usuario = await _context.Usuarios.Include(u => u.Logros)
-                                                 .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (usuario == null) return NotFound("Usuario no encontrado");
-
-            nuevoLogro.Id = 0;
-            usuario.Logros.Add(nuevoLogro);
-
-            await _context.SaveChangesAsync();
-            return Ok(nuevoLogro);
         }
 
         // 6. BORRAR CUENTA (ADMIN)
@@ -333,7 +316,6 @@ namespace AtlasAPI.Controllers
                 Nivel = u.Nivel,
                 Experiencia = u.Experiencia,
                 Avatar = u.Avatar,
-                Logros = u.Logros,
                 EventosFavoritosIds = u.EventosFavoritos?.Select(f => f.EventoId).ToList() ?? new List<int>()
             };
         }
@@ -352,30 +334,10 @@ namespace AtlasAPI.Controllers
                 usuario.Experiencia -= 100;
             }
 
-            // --- SISTEMA DE LOGROS AUTOMÁTICO CON NOTIFICACIÓN ---
-            var todosLosLogros = await _context.Logros.ToListAsync();
-            var logrosActuales = await _context.UsuariosLogros
-                .Where(ul => ul.UsuarioId == id)
-                .Select(ul => ul.LogroId)
-                .ToListAsync();
-
-            var nuevosLogros = new List<Logro>();
-
-            foreach (var logro in todosLosLogros)
-            {
-                // Si cumple el requisito y NO lo tiene ya
-                if (!logrosActuales.Contains(logro.Id) && usuario.Nivel >= logro.Id)
-                {
-                    var nuevoRegistro = new UsuarioLogro { UsuarioId = id, LogroId = logro.Id };
-                    _context.UsuariosLogros.Add(nuevoRegistro);
-                    nuevosLogros.Add(logro); // Lo guardamos para avisar a Android
-                }
-            }
-
             await _context.SaveChangesAsync();
             
             // Devolvemos DTO para no exponer campos sensibles
-            return Ok(new { Usuario = MapToDto(usuario), NuevosLogros = nuevosLogros });
+            return Ok(new { Usuario = MapToDto(usuario) });
         }
 
         //IA
