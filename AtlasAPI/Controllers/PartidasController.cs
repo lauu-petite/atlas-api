@@ -48,7 +48,9 @@ namespace AtlasAPI.Controllers
             Console.WriteLine($"[DEBUG]   Siglo: {partida.Siglo}");
             Console.WriteLine($"[DEBUG]   Fecha (antes de asignar): {partida.Fecha}");
             
-            partida.Fecha = DateTime.Now;
+            // Aseguramos que la fecha se establezca en el servidor para evitar problemas de formato o zona horaria desde el cliente.
+            partida.Fecha = DateTime.UtcNow;
+            Console.WriteLine($"[DEBUG]   Fecha (final antes de Add): {partida.Fecha}");
             
             _context.Partidas.Add(partida);
             await _context.SaveChangesAsync();
