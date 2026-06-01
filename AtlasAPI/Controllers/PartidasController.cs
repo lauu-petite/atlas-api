@@ -48,6 +48,13 @@ namespace AtlasAPI.Controllers
             Console.WriteLine($"[DEBUG]   Siglo: {partida.Siglo}");
             Console.WriteLine($"[DEBUG]   Fecha (antes de asignar): {partida.Fecha}");
             
+            // --- VALIDACIÓN DE USUARIO VÁLIDO ---
+            if (partida.UsuarioId <= 0)
+            {
+                Console.WriteLine($"[ERROR] Intento de guardar partida con UsuarioId inválido: {partida.UsuarioId}");
+                return BadRequest("El UsuarioId debe ser un valor positivo válido.");
+            }
+
             // --- VALIDACIÓN ADICIONAL PARA DETECTAR DATOS MALFORMADOS ---
             // Verificamos si los valores recibidos parecen ser rutas de archivo en lugar de datos válidos.
             if (IsPotentiallyFilePath(partida.UsuarioId.ToString()))
