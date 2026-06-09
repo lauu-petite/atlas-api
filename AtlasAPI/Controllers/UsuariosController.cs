@@ -316,7 +316,8 @@ namespace AtlasAPI.Controllers
                 Nivel = u.Nivel,
                 Experiencia = u.Experiencia,
                 Avatar = u.Avatar,
-                EventosFavoritosIds = u.EventosFavoritos?.Select(f => f.EventoId).ToList() ?? new List<int>()
+                EventosFavoritosIds = u.EventosFavoritos?.Select(f => f.EventoId).ToList() ?? new List<int>(),
+                EstaBaneado = u.EstaBaneado
             };
         }
 
